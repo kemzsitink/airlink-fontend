@@ -57,7 +57,7 @@ export function ServerLayout({ children, serverUUID, serverName, serverDescripti
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-0.5 border-b border-neutral-200 dark:border-neutral-700/40 mb-6 overflow-x-auto">
+      <div className="flex gap-0.5 border-b border-neutral-200 dark:border-neutral-700/40 mb-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {tabs.map((t) => {
           const href = `${base}${t.path}`;
           const isActive = t.path === "" ? pathname === base : pathname.startsWith(href);
