@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { useNodes } from "@/modules/nodes/hooks";
 import { cn } from "@/lib/utils";
 
 export default function AdminNodesPage() {
+  const router = useRouter();
   const { nodes } = useNodes();
   const online = nodes.filter((n) => n.status === "Online").length;
   const totalInstances = nodes.reduce((t, n) => t + n.instances.length, 0);
@@ -58,7 +60,7 @@ export default function AdminNodesPage() {
           <tbody className="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
             {nodes.map((node) => (
               <tr key={node.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer"
-                onClick={() => (window.location.href = `/admin/nodes/${node.id}/stats`)}>
+                onClick={() => router.push(`/admin/nodes/${node.id}/stats`)}>
                 <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm">
                   <div className="flex items-center gap-3">
                     <span className={cn("flex h-2 w-2 rounded-full shrink-0", node.status === "Online" ? "bg-emerald-500" : "bg-red-500")} />

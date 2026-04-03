@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { useUsers } from "@/modules/users/hooks";
 import { cn } from "@/lib/utils";
 
 export default function AdminUsersPage() {
+  const router = useRouter();
   const { users } = useUsers();
   const admins = users.filter((u) => u.isAdmin).length;
   const online = users.filter((u) => u.online).length;
@@ -49,7 +51,7 @@ export default function AdminUsersPage() {
           <tbody className="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
             {users.map((user) => (
               <tr key={user.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer"
-                onClick={() => (window.location.href = `/admin/users/view/${user.id}`)}>
+                onClick={() => router.push(`/admin/users/view/${user.id}`)}>
                 <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm">
                   <div className="flex items-center gap-3">
                     <div className="relative shrink-0">

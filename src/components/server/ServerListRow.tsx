@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 interface Server {
@@ -11,10 +14,11 @@ interface Server {
 }
 
 export function ServerListRow({ server }: { server: Server }) {
+  const router = useRouter();
   const isRunning = server.status === "running";
   return (
     <tr
-      onClick={() => (window.location.href = `/server/${server.UUID}`)}
+      onClick={() => router.push(`/server/${server.UUID}`)}
       className="hover:bg-neutral-50 dark:hover:bg-white/5 cursor-pointer transition-colors"
     >
       <td className="py-3.5 pl-6 pr-3">

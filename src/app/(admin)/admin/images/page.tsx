@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, Upload, Store } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
 import { useImages } from "@/modules/images/hooks";
 
 export default function AdminImagesPage() {
+  const router = useRouter();
   const { images } = useImages();
   const [filter, setFilter] = useState("");
   const filtered = images.filter((i) => i.name.toLowerCase().includes(filter.toLowerCase()));
@@ -52,7 +54,7 @@ export default function AdminImagesPage() {
           <tbody className="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
             {filtered.map((image) => (
               <tr key={image.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer"
-                onClick={() => (window.location.href = `/admin/images/edit/${image.id}`)}>
+                onClick={() => router.push(`/admin/images/edit/${image.id}`)}>
                 <td className="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-white">{image.name}</td>
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">{image.author || "—"}</td>
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">{new Date(image.createdAt).toLocaleDateString()}</td>
