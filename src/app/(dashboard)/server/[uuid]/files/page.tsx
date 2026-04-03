@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";
 import { Folder, FileText, FileCog, Image, Plus, Upload, Trash2, Pencil, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -28,7 +28,8 @@ function FileIcon({ type, category }: { type: string; category?: string }) {
   return <FileText className="w-5 h-5 text-neutral-400" />;
 }
 
-export default function ServerFilesPage({ params }: { params: { uuid: string } }) {
+export default function ServerFilesPage({ params }: { params: Promise<{ uuid: string }> }) {
+  const { uuid } = use(params);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   function toggle(name: string) {

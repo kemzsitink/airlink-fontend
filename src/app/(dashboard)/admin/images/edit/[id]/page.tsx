@@ -15,7 +15,8 @@ const mockImage = {
   ],
 };
 
-export default function AdminEditImagePage({ params }: { params: { id: string } }) {
+export default async function AdminEditImagePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return (
     <>
       <div className="flex items-center gap-3 mb-6">

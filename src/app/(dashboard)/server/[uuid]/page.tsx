@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, use } from "react";
 import { Copy, Check } from "lucide-react";
 
 const mockStats = { ip: "127.0.0.1:25565", status: "Running", ram: "72% (2.8GB / 4GB)", cpu: "34%", disk: "12.4 GB" };
 
-export default function ServerConsolePage({ params }: { params: { uuid: string } }) {
+export default function ServerConsolePage({ params }: { params: Promise<{ uuid: string }> }) {
+  const { uuid } = use(params);
   const [input, setInput] = useState("");
   const [logs, setLogs] = useState<string[]>([
     "[Server] Starting Minecraft server...",

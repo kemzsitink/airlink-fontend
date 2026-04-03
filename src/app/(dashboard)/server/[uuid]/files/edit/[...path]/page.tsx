@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,11 @@ level-name=world
 motd=A Minecraft Server
 `;
 
-export default function FileEditorPage({ params }: { params: { uuid: string; path: string[] } }) {
+export default function FileEditorPage({ params }: { params: Promise<{ uuid: string; path: string[] }> }) {
+  const { uuid, path } = use(params);
   const [content, setContent] = useState(mockContent);
   const [saved, setSaved] = useState(false);
-  const filePath = params.path.join("/");
+  const filePath = path.join("/");
 
   function save() {
     setSaved(true);
@@ -28,7 +29,7 @@ export default function FileEditorPage({ params }: { params: { uuid: string; pat
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <Link href={`/server/${params.uuid}/files`} className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition">
+          <Link href={`/server/${uuid}/files`} className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition">
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
