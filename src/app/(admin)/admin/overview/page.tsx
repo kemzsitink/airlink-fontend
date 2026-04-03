@@ -5,6 +5,7 @@ import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, MessageSquare, BookOpen, Code2, Heart } from "lucide-react";
 import { useAnalytics } from "@/modules/analytics/hooks";
+import { MOCK_ANALYTICS } from "@/modules/analytics/types";
 
 const resources = [
   { label: "Discord", desc: "Community support and discussions", href: "https://discord.gg/BybfXms7JZ", icon: <MessageSquare className="w-4 h-4" /> },
@@ -14,7 +15,7 @@ const resources = [
 ];
 
 export default function OverviewPage() {
-  const { data } = useAnalytics();
+  const { data = MOCK_ANALYTICS } = useAnalytics();
   const [updateStatus, setUpdateStatus] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
 
@@ -64,7 +65,6 @@ export default function OverviewPage() {
             Check Updates
           </Button>
         </div>
-
         {updateStatus && (
           <div className="text-sm rounded-lg p-3 bg-neutral-200/60 dark:bg-neutral-800/60 text-neutral-600 dark:text-neutral-400">
             {updateStatus}

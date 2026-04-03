@@ -10,7 +10,7 @@ import { useImages } from "@/modules/images/hooks";
 
 export default function AdminImagesPage() {
   const router = useRouter();
-  const { images } = useImages();
+  const { data: images = [] } = useImages();
   const [filter, setFilter] = useState("");
   const filtered = images.filter((i) => i.name.toLowerCase().includes(filter.toLowerCase()));
 

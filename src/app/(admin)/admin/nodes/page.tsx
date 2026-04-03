@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 export default function AdminNodesPage() {
   const router = useRouter();
-  const { nodes } = useNodes();
+  const { data: nodes = [] } = useNodes();
   const online = nodes.filter((n) => n.status === "Online").length;
   const totalInstances = nodes.reduce((t, n) => t + n.instances.length, 0);
 

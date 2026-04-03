@@ -1,41 +1,56 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersApi } from "./api";
 import { MOCK_USERS } from "./types";
-import type { AdminUser } from "./types";
+import type { CreateUserPayload, UpdateUserPayload } from "./types";
+
+export const userKeys = {
+  all: ["users"] as const,
+  list: () => [...userKeys.all, "list"] as const,
+  detail: (id: number) => [...userKeys.all, id] as const,
+};
 
 export function useUsers() {
-  const [users, setUsers] = useState<AdminUser[]>(MOCK_USERS);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    usersApi
-      .list()
-      .then(setUsers)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { users, loading };
+  return useQuery({
+    queryKey: userKeys.list(),
+    queryFn: usersApi.list,
+    placeholderData: MOCK_USERS,
+  });
 }
 
 export function useUser(id: number) {
-  const [user, setUser] = useState<AdminUser | null>(
-    MOCK_USERS.find((u) => u.id === id) ?? null
-  );
-  const [loading, setLoading] = useState(false);
+  return useQuery({
+    queryKey: userKeys.detail(id),
+    queryFn: () => usersApi.get(id),
+    placeholderData: MOCK_USERS.find((u) => u.id === id),
+    enabled: !!id,
+  });
+}
 
-  useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    usersApi
-      .get(id)
-      .then(setUser)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [id]);
+export function useCreateUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateUserPayload) => usersApi.create(payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: userKeys.list() }),
+  });
+}
 
-  return { user, loading };
+export function useUpdateUser(id: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UpdateUserPayload) => usersApi.update(id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: userKeys.list() });
+      qc.invalidateQueries({ queryKey: userKeys.detail(id) });
+    },
+  });
+}
+
+export function useDeleteUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => usersApi.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: userKeys.list() }),
+  });
 }

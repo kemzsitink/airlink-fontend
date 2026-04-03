@@ -1,39 +1,62 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { settingsApi } from "./api";
 import { MOCK_SETTINGS, MOCK_BANNED_IPS } from "./types";
 import type { PanelSettings } from "./types";
 
+export const settingsKeys = {
+  settings: ["settings"] as const,
+  bannedIps: ["settings", "banned-ips"] as const,
+};
+
 export function useSettings() {
-  const [settings, setSettings] = useState<PanelSettings>(MOCK_SETTINGS);
-  const [loading, setLoading] = useState(false);
+  return useQuery({
+    queryKey: settingsKeys.settings,
+    queryFn: settingsApi.get,
+    placeholderData: MOCK_SETTINGS,
+  });
+}
 
-  useEffect(() => {
-    setLoading(true);
-    settingsApi
-      .get()
-      .then(setSettings)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+export function useSaveRateLimit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { rateLimitEnabled: boolean; rateLimitRpm: number }) =>
+      settingsApi.saveRateLimit(payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: settingsKeys.settings }),
+  });
+}
 
-  return { settings, setSettings, loading };
+export function useSaveServerPolicy() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: Partial<PanelSettings>) => settingsApi.saveServerPolicy(payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: settingsKeys.settings }),
+  });
 }
 
 export function useBannedIps() {
-  const [bannedIps, setBannedIps] = useState<string[]>(MOCK_BANNED_IPS);
+  const qc = useQueryClient();
 
-  function ban(ip: string) {
-    if (!ip.trim() || bannedIps.includes(ip.trim())) return;
-    setBannedIps((prev) => [...prev, ip.trim()]);
-    settingsApi.banIp(ip.trim()).catch(() => {});
-  }
+  const query = useQuery({
+    queryKey: settingsKeys.bannedIps,
+    queryFn: settingsApi.getBannedIps,
+    placeholderData: MOCK_BANNED_IPS,
+  });
 
-  function unban(ip: string) {
-    setBannedIps((prev) => prev.filter((i) => i !== ip));
-    settingsApi.unbanIp(ip).catch(() => {});
-  }
+  const ban = useMutation({
+    mutationFn: (ip: string) => settingsApi.banIp(ip),
+    onSuccess: () => qc.invalidateQueries({ queryKey: settingsKeys.bannedIps }),
+  });
 
-  return { bannedIps, ban, unban };
+  const unban = useMutation({
+    mutationFn: (ip: string) => settingsApi.unbanIp(ip),
+    onSuccess: () => qc.invalidateQueries({ queryKey: settingsKeys.bannedIps }),
+  });
+
+  return {
+    bannedIps: query.data ?? MOCK_BANNED_IPS,
+    ban: (ip: string) => ban.mutate(ip),
+    unban: (ip: string) => unban.mutate(ip),
+  };
 }

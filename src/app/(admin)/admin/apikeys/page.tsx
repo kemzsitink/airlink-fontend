@@ -9,7 +9,7 @@ import { useApiKeys } from "@/modules/apikeys/hooks";
 import { cn } from "@/lib/utils";
 
 export default function AdminApiKeysPage() {
-  const { keys } = useApiKeys();
+  const { data: keys = [] } = useApiKeys();
   const [copied, setCopied] = useState<number | null>(null);
 
   function copyKey(id: number, key: string) {

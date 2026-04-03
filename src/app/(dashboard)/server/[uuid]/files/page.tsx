@@ -23,7 +23,7 @@ function FileIcon({ type, category }: { type: string; category?: string }) {
 
 export default function ServerFilesPage({ params }: { params: Promise<{ uuid: string }> }) {
   const { uuid } = use(params);
-  const { files } = useFiles(uuid);
+  const { data: files = [] } = useFiles(uuid);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   function toggle(name: string) {

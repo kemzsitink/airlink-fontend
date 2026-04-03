@@ -9,7 +9,7 @@ import { useImage } from "@/modules/images/hooks";
 
 export default function AdminEditImagePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { image } = useImage(Number(id));
+  const { data: image } = useImage(Number(id));
 
   if (!image) return <p className="text-sm text-neutral-500">Loading...</p>;
 

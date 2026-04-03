@@ -5,13 +5,15 @@ import Link from "next/link";
 import { RefreshCw, Trash2, Store } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
-import { useAddons } from "@/modules/addons/hooks";
+import { useAddons, useToggleAddon, useUninstallAddon } from "@/modules/addons/hooks";
 import { cn } from "@/lib/utils";
 
 export default function AdminAddonsPage() {
-  const { addons, toggle, uninstall } = useAddons();
+  const { data: addons = [], refetch } = useAddons();
+  const toggleMutation = useToggleAddon();
+  const uninstallMutation = useUninstallAddon();
   const [filter, setFilter] = useState("");
-  const filtered = addons.filter((a) =>
+  const filtered = addons.filter((a: { name: string; description?: string; author?: string }) =>
     `${a.name} ${a.description ?? ""} ${a.author ?? ""}`.toLowerCase().includes(filter.toLowerCase())
   );
 
@@ -70,10 +72,10 @@ export default function AdminAddonsPage() {
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm">
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => toggle(addon.slug)}>
+                        <Button variant="outline" size="sm" onClick={() => toggleMutation.mutate({ slug: addon.slug, enabled: !addon.enabled })}>
                           {addon.enabled ? "Disable" : "Enable"}
                         </Button>
-                        <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => uninstall(addon.slug)}>
+                        <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => uninstallMutation.mutate(addon.slug)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>

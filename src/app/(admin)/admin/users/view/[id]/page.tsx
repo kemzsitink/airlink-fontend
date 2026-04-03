@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 export default function AdminViewUserPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { user } = useUser(Number(id));
+  const { data: user } = useUser(Number(id));
 
   if (!user) return <p className="text-sm text-neutral-500">Loading...</p>;
 

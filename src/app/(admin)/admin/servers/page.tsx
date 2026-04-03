@@ -8,7 +8,7 @@ import { useServers } from "@/modules/servers/hooks";
 import { cn } from "@/lib/utils";
 
 export default function AdminServersPage() {
-  const { servers } = useServers();
+  const { data: servers = [] } = useServers();
 
   return (
     <>

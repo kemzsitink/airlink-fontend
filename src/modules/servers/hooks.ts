@@ -1,89 +1,80 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { serversApi } from "./api";
 import { MOCK_SERVERS, MOCK_BACKUPS, MOCK_STARTUP, MOCK_FILES } from "./types";
-import type { Server, Backup, StartupVariable, FileEntry } from "./types";
+
+export const serverKeys = {
+  all: ["servers"] as const,
+  list: () => [...serverKeys.all, "list"] as const,
+  detail: (uuid: string) => [...serverKeys.all, uuid] as const,
+  backups: (uuid: string) => [...serverKeys.all, uuid, "backups"] as const,
+  startup: (uuid: string) => [...serverKeys.all, uuid, "startup"] as const,
+  files: (uuid: string, path?: string) => [...serverKeys.all, uuid, "files", path ?? "/"] as const,
+};
 
 export function useServers() {
-  const [servers, setServers] = useState<Server[]>(MOCK_SERVERS);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    serversApi
-      .list()
-      .then(setServers)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { servers, loading };
+  return useQuery({
+    queryKey: serverKeys.list(),
+    queryFn: serversApi.list,
+    placeholderData: MOCK_SERVERS,
+  });
 }
 
 export function useServer(uuid: string) {
-  const [server, setServer] = useState<Server | null>(
-    MOCK_SERVERS.find((s) => s.UUID === uuid) ?? null
-  );
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!uuid) return;
-    setLoading(true);
-    serversApi
-      .get(uuid)
-      .then(setServer)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [uuid]);
-
-  return { server, loading };
+  return useQuery({
+    queryKey: serverKeys.detail(uuid),
+    queryFn: () => serversApi.get(uuid),
+    placeholderData: MOCK_SERVERS.find((s) => s.UUID === uuid),
+    enabled: !!uuid,
+  });
 }
 
 export function useBackups(uuid: string) {
-  const [backups, setBackups] = useState<Backup[]>(MOCK_BACKUPS);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    serversApi
-      .listBackups(uuid)
-      .then(setBackups)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [uuid]);
-
-  return { backups, loading };
+  return useQuery({
+    queryKey: serverKeys.backups(uuid),
+    queryFn: () => serversApi.listBackups(uuid),
+    placeholderData: MOCK_BACKUPS,
+    enabled: !!uuid,
+  });
 }
 
 export function useStartup(uuid: string) {
-  const [startup, setStartup] = useState(MOCK_STARTUP);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    serversApi
-      .getStartup(uuid)
-      .then(setStartup)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [uuid]);
-
-  return { startup, loading };
+  return useQuery({
+    queryKey: serverKeys.startup(uuid),
+    queryFn: () => serversApi.getStartup(uuid),
+    placeholderData: MOCK_STARTUP,
+    enabled: !!uuid,
+  });
 }
 
 export function useFiles(uuid: string, path?: string) {
-  const [files, setFiles] = useState<FileEntry[]>(MOCK_FILES);
-  const [loading, setLoading] = useState(false);
+  return useQuery({
+    queryKey: serverKeys.files(uuid, path),
+    queryFn: () => serversApi.listFiles(uuid, path),
+    placeholderData: MOCK_FILES,
+    enabled: !!uuid,
+  });
+}
 
-  useEffect(() => {
-    setLoading(true);
-    serversApi
-      .listFiles(uuid, path)
-      .then(setFiles)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [uuid, path]);
+export function useCreateBackup(uuid: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => serversApi.createBackup(uuid),
+    onSuccess: () => qc.invalidateQueries({ queryKey: serverKeys.backups(uuid) }),
+  });
+}
 
-  return { files, loading };
+export function useDeleteBackup(uuid: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (backupId: number) => serversApi.deleteBackup(uuid, backupId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: serverKeys.backups(uuid) }),
+  });
+}
+
+export function useSaveVariables(uuid: string) {
+  return useMutation({
+    mutationFn: (variables: Record<string, string>) => serversApi.saveVariables(uuid, variables),
+  });
 }

@@ -1,41 +1,46 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { nodesApi } from "./api";
 import { MOCK_NODES } from "./types";
-import type { Node } from "./types";
+import type { CreateNodePayload } from "./types";
+
+export const nodeKeys = {
+  all: ["nodes"] as const,
+  list: () => [...nodeKeys.all, "list"] as const,
+  detail: (id: number) => [...nodeKeys.all, id] as const,
+};
 
 export function useNodes() {
-  const [nodes, setNodes] = useState<Node[]>(MOCK_NODES);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    nodesApi
-      .list()
-      .then(setNodes)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { nodes, loading };
+  return useQuery({
+    queryKey: nodeKeys.list(),
+    queryFn: nodesApi.list,
+    placeholderData: MOCK_NODES,
+  });
 }
 
 export function useNode(id: number) {
-  const [node, setNode] = useState<Node | null>(
-    MOCK_NODES.find((n) => n.id === id) ?? null
-  );
-  const [loading, setLoading] = useState(false);
+  return useQuery({
+    queryKey: nodeKeys.detail(id),
+    queryFn: () => nodesApi.get(id),
+    placeholderData: MOCK_NODES.find((n) => n.id === id),
+    enabled: !!id,
+  });
+}
 
-  useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    nodesApi
-      .get(id)
-      .then(setNode)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [id]);
+export function useCreateNode() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateNodePayload) => nodesApi.create(payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: nodeKeys.list() }),
+  });
+}
 
-  return { node, loading };
+export function useDeleteNode() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, deleteInstances }: { id: number; deleteInstances?: boolean }) =>
+      nodesApi.delete(id, deleteInstances),
+    onSuccess: () => qc.invalidateQueries({ queryKey: nodeKeys.list() }),
+  });
 }

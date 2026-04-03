@@ -11,7 +11,7 @@ import { useServers } from "@/modules/servers/hooks";
 import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
-  const { servers } = useServers();
+  const { data: servers = [] } = useServers();
   const [view, setView] = useState<"grid" | "list">("grid");
   const canCreateServer = true;
 

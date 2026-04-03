@@ -5,13 +5,13 @@ import { Upload, Coins } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/modules/auth/hooks";
-import { MOCK_LOGIN_HISTORY } from "@/modules/auth/types";
+import { MOCK_USER, MOCK_LOGIN_HISTORY } from "@/modules/auth/types";
 
 const languages = ["en", "fr", "de", "es", "pt", "it", "ru", "zh", "ja", "ta"];
 const langLabels: Record<string, string> = { en: "English", fr: "Français", de: "Deutsch", es: "Español", pt: "Português", it: "Italiano", ru: "Русский", zh: "中文", ja: "日本語", ta: "தமிழ்" };
 
 export default function AccountPage() {
-  const { user } = useCurrentUser();
+  const { data: user = MOCK_USER } = useCurrentUser();
   const avatarUrl = user.avatar || `https://api.dicebear.com/9.x/thumbs/svg?seed=${user.username}`;
 
   return (

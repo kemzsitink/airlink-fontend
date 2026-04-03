@@ -1,35 +1,35 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { addonsApi } from "./api";
 import { MOCK_ADDONS } from "./types";
-import type { Addon } from "./types";
+
+export const addonKeys = {
+  all: ["addons"] as const,
+  list: () => [...addonKeys.all, "list"] as const,
+};
 
 export function useAddons() {
-  const [addons, setAddons] = useState<Addon[]>(MOCK_ADDONS);
-  const [loading, setLoading] = useState(false);
+  return useQuery({
+    queryKey: addonKeys.list(),
+    queryFn: addonsApi.list,
+    placeholderData: MOCK_ADDONS,
+  });
+}
 
-  useEffect(() => {
-    setLoading(true);
-    addonsApi
-      .list()
-      .then(setAddons)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+export function useToggleAddon() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ slug, enabled }: { slug: string; enabled: boolean }) =>
+      addonsApi.toggle(slug, enabled),
+    onSuccess: () => qc.invalidateQueries({ queryKey: addonKeys.list() }),
+  });
+}
 
-  function toggle(slug: string) {
-    setAddons((prev) =>
-      prev.map((a) => (a.slug === slug ? { ...a, enabled: !a.enabled } : a))
-    );
-    const addon = addons.find((a) => a.slug === slug);
-    if (addon) addonsApi.toggle(slug, !addon.enabled).catch(() => {});
-  }
-
-  function uninstall(slug: string) {
-    setAddons((prev) => prev.filter((a) => a.slug !== slug));
-    addonsApi.uninstall(slug).catch(() => {});
-  }
-
-  return { addons, loading, toggle, uninstall };
+export function useUninstallAddon() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (slug: string) => addonsApi.uninstall(slug),
+    onSuccess: () => qc.invalidateQueries({ queryKey: addonKeys.list() }),
+  });
 }

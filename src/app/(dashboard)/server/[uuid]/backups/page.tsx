@@ -7,7 +7,7 @@ import { useBackups } from "@/modules/servers/hooks";
 
 export default function ServerBackupsPage({ params }: { params: Promise<{ uuid: string }> }) {
   const { uuid } = use(params);
-  const { backups } = useBackups(uuid);
+  const { data: backups = [] } = useBackups(uuid);
 
   return (
     <div>

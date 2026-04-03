@@ -4,13 +4,15 @@ import { useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { useAnalytics } from "@/modules/analytics/hooks";
+import { MOCK_ANALYTICS } from "@/modules/analytics/types";
 import { cn } from "@/lib/utils";
 
 type Tab = "servers" | "nodes" | "activity";
 
 export default function AdminAnalyticsPage() {
-  const { data, loading, refresh } = useAnalytics();
+  const { data = MOCK_ANALYTICS, isFetching, refetch } = useAnalytics();
   const [tab, setTab] = useState<Tab>("servers");
+  const onlineNodes = data.nodes.filter((n) => n.online).length;
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "servers", label: "Servers" },
@@ -18,17 +20,15 @@ export default function AdminAnalyticsPage() {
     { id: "activity", label: "Activity" },
   ];
 
-  const onlineNodes = data.nodes.filter((n) => n.online).length;
-
   return (
     <>
       <PageTitle
         title="Analytics"
         description="Live data from the database and connected daemons."
         actions={
-          <button onClick={refresh}
+          <button onClick={() => refetch()}
             className="flex items-center gap-1.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 px-3 py-2 text-sm font-medium transition">
-            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
+            <RefreshCw className={cn("w-4 h-4", isFetching && "animate-spin")} />
             Refresh
           </button>
         }

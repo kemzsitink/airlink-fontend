@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 export default function AdminUsersPage() {
   const router = useRouter();
-  const { users } = useUsers();
+  const { data: users = [] } = useUsers();
   const admins = users.filter((u) => u.isAdmin).length;
   const online = users.filter((u) => u.online).length;
 

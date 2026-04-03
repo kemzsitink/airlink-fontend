@@ -3,10 +3,11 @@
 import { RefreshCw, Users, Server, Activity, BarChart2 } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { usePlayerStats } from "@/modules/analytics/hooks";
+import { MOCK_PLAYER_STATS } from "@/modules/analytics/types";
 import { cn } from "@/lib/utils";
 
 export default function AdminPlayerStatsPage() {
-  const { data, loading, refresh } = usePlayerStats();
+  const { data = MOCK_PLAYER_STATS, isFetching, refetch } = usePlayerStats();
   const utilization = data.totalMaxPlayers > 0
     ? Math.round((data.totalPlayers / data.totalMaxPlayers) * 100)
     : 0;
@@ -24,9 +25,9 @@ export default function AdminPlayerStatsPage() {
         title="Player Statistics"
         description="View player statistics across all Minecraft servers"
         actions={
-          <button onClick={refresh}
+          <button onClick={() => refetch()}
             className="border border-neutral-200 dark:border-neutral-800/20 block rounded-xl bg-white dark:bg-white/5 hover:bg-neutral-50 dark:hover:bg-white/10 text-neutral-800 dark:text-white px-3 py-2 text-sm font-medium shadow-lg transition flex items-center gap-1.5">
-            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
+            <RefreshCw className={cn("w-4 h-4", isFetching && "animate-spin")} />
             Refresh Data
           </button>
         }

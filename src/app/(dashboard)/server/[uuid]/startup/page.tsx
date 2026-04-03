@@ -6,7 +6,7 @@ import { useStartup } from "@/modules/servers/hooks";
 
 export default function ServerStartupPage({ params }: { params: Promise<{ uuid: string }> }) {
   const { uuid } = use(params);
-  const { startup } = useStartup(uuid);
+  const { data: startup = { command: "", variables: [] } } = useStartup(uuid);
 
   return (
     <div className="space-y-6">

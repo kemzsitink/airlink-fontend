@@ -1,16 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
 import { useSettings, useBannedIps } from "@/modules/settings/hooks";
+import { MOCK_SETTINGS } from "@/modules/settings/types";
 import { cn } from "@/lib/utils";
 
 export default function AdminSecurityPage() {
-  const { settings, setSettings } = useSettings();
+  const { data } = useSettings();
   const { bannedIps, ban, unban } = useBannedIps();
+  const [rateLimitEnabled, setRateLimitEnabled] = useState(MOCK_SETTINGS.rateLimitEnabled);
+  const [rpm, setRpm] = useState(MOCK_SETTINGS.rateLimitRpm);
   const [newIp, setNewIp] = useState("");
+
+  useEffect(() => {
+    if (data) {
+      setRateLimitEnabled(data.rateLimitEnabled);
+      setRpm(data.rateLimitRpm);
+    }
+  }, [data]);
 
   return (
     <>
@@ -28,18 +38,16 @@ export default function AdminSecurityPage() {
                 <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Enable rate limiting</p>
                 <p className="text-xs text-neutral-500 mt-0.5">Block IPs that exceed the request threshold.</p>
               </div>
-              <button
-                onClick={() => setSettings((s) => ({ ...s, rateLimitEnabled: !s.rateLimitEnabled }))}
+              <button onClick={() => setRateLimitEnabled(!rateLimitEnabled)}
                 className={cn("relative inline-flex h-5 w-10 items-center rounded-full transition-colors",
-                  settings.rateLimitEnabled ? "bg-neutral-900 dark:bg-white" : "bg-neutral-300 dark:bg-neutral-600")}>
+                  rateLimitEnabled ? "bg-neutral-900 dark:bg-white" : "bg-neutral-300 dark:bg-neutral-600")}>
                 <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white dark:bg-neutral-900 border transition-transform",
-                  settings.rateLimitEnabled ? "translate-x-5" : "translate-x-0.5")} />
+                  rateLimitEnabled ? "translate-x-5" : "translate-x-0.5")} />
               </button>
             </div>
             <div>
               <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Requests per minute</label>
-              <input type="number" value={settings.rateLimitRpm}
-                onChange={(e) => setSettings((s) => ({ ...s, rateLimitRpm: Number(e.target.value) }))}
+              <input type="number" value={rpm} onChange={(e) => setRpm(Number(e.target.value))}
                 className="w-40 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition" />
             </div>
             <Button size="sm">Save</Button>

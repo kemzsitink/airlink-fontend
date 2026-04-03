@@ -1,22 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiKeysApi } from "./api";
 import { MOCK_API_KEYS } from "./types";
-import type { ApiKey } from "./types";
+import type { CreateApiKeyPayload } from "./types";
+
+export const apiKeyKeys = {
+  all: ["apikeys"] as const,
+  list: () => [...apiKeyKeys.all, "list"] as const,
+};
 
 export function useApiKeys() {
-  const [keys, setKeys] = useState<ApiKey[]>(MOCK_API_KEYS);
-  const [loading, setLoading] = useState(false);
+  return useQuery({
+    queryKey: apiKeyKeys.list(),
+    queryFn: apiKeysApi.list,
+    placeholderData: MOCK_API_KEYS,
+  });
+}
 
-  useEffect(() => {
-    setLoading(true);
-    apiKeysApi
-      .list()
-      .then(setKeys)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+export function useCreateApiKey() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateApiKeyPayload) => apiKeysApi.create(payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: apiKeyKeys.list() }),
+  });
+}
 
-  return { keys, loading, setKeys };
+export function useToggleApiKey() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => apiKeysApi.toggle(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: apiKeyKeys.list() }),
+  });
+}
+
+export function useDeleteApiKey() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => apiKeysApi.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: apiKeyKeys.list() }),
+  });
 }

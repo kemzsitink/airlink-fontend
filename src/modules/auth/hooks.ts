@@ -1,22 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { authApi } from "./api";
 import { MOCK_USER } from "./types";
-import type { User } from "./types";
+
+export const authKeys = {
+  me: ["auth", "me"] as const,
+  loginHistory: ["auth", "login-history"] as const,
+};
 
 export function useCurrentUser() {
-  const [user, setUser] = useState<User>(MOCK_USER);
-  const [loading, setLoading] = useState(false);
+  return useQuery({
+    queryKey: authKeys.me,
+    queryFn: authApi.me,
+    placeholderData: MOCK_USER,
+  });
+}
 
-  useEffect(() => {
-    setLoading(true);
-    authApi
-      .me()
-      .then(setUser)
-      .catch(() => {}) // fallback to mock
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { user, loading };
+export function useLoginHistory() {
+  return useQuery({
+    queryKey: authKeys.loginHistory,
+    queryFn: authApi.loginHistory,
+    placeholderData: [],
+  });
 }
