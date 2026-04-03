@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ThemeProvider } from "next-themes";
+import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -19,10 +19,10 @@ export default function RootLayout({
         className="min-h-full bg-neutral-50 dark:bg-[#141414] text-neutral-800 dark:text-white antialiased"
         style={{ fontFamily: "'General Sans', sans-serif" }}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <Providers>
           {children}
           <Toaster />
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
