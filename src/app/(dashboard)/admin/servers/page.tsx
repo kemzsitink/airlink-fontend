@@ -4,14 +4,12 @@ import Link from "next/link";
 import { Plus, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
+import { useServers } from "@/modules/servers/hooks";
 import { cn } from "@/lib/utils";
 
-const mockServers = [
-  { id: 1, UUID: "abc-123", name: "Minecraft SMP", owner: { id: 1, username: "admin", avatar: "" }, node: { id: 1, name: "Node-1", address: "127.0.0.1" }, Ports: '[{"primary":true,"Port":"0.0.0.0:25565"}]', Suspended: false },
-  { id: 2, UUID: "def-456", name: "Velocity Proxy", owner: { id: 1, username: "admin", avatar: "" }, node: { id: 1, name: "Node-1", address: "127.0.0.1" }, Ports: '[{"primary":true,"Port":"0.0.0.0:25577"}]', Suspended: true },
-];
-
 export default function AdminServersPage() {
+  const { servers } = useServers();
+
   return (
     <>
       <PageTitle
@@ -20,8 +18,7 @@ export default function AdminServersPage() {
         actions={
           <Button asChild size="sm" variant="outline">
             <Link href="/admin/servers/create">
-              <Plus className="w-4 h-4" />
-              Create Server
+              <Plus className="w-4 h-4" />Create Server
             </Link>
           </Button>
         }
@@ -37,7 +34,7 @@ export default function AdminServersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
-            {mockServers.map((server) => {
+            {servers.map((server) => {
               const port = JSON.parse(server.Ports).find((p: { primary: boolean }) => p.primary)?.Port.split(":")[1];
               return (
                 <tr key={server.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03] transition-colors">
@@ -54,7 +51,7 @@ export default function AdminServersPage() {
                     </div>
                   </td>
                   <td className="py-4 px-4 text-sm">
-                    <Link href={`/admin/users/view/${server.owner.id}`} className="flex items-center gap-2 group">
+                    <Link href={`/admin/users/view/${server.owner.id}`} className="flex items-center gap-2 group" onClick={(e) => e.stopPropagation()}>
                       <img className="h-6 w-6 rounded-md" src={`https://api.dicebear.com/9.x/thumbs/svg?seed=${server.owner.username}`} alt="" />
                       <span className="font-medium text-neutral-800 dark:text-blue-400 group-hover:underline">{server.owner.username}</span>
                     </Link>

@@ -5,49 +5,29 @@ import Link from "next/link";
 import { RefreshCw, Trash2, Store } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
+import { useAddons } from "@/modules/addons/hooks";
 import { cn } from "@/lib/utils";
 
-const mockAddons = [
-  { slug: "player-stats", name: "Player Stats", description: "Track player statistics across servers", version: "1.2.0", author: "AirlinkLabs", enabled: true },
-  { slug: "auto-backup", name: "Auto Backup", description: "Automated server backups", version: "0.9.1", author: "community", enabled: false },
-];
-
 export default function AdminAddonsPage() {
-  const [addons, setAddons] = useState(mockAddons);
+  const { addons, toggle, uninstall } = useAddons();
   const [filter, setFilter] = useState("");
-
   const filtered = addons.filter((a) =>
-    `${a.name} ${a.description} ${a.author}`.toLowerCase().includes(filter.toLowerCase())
+    `${a.name} ${a.description ?? ""} ${a.author ?? ""}`.toLowerCase().includes(filter.toLowerCase())
   );
-
-  function toggle(slug: string) {
-    setAddons((prev) => prev.map((a) => a.slug === slug ? { ...a, enabled: !a.enabled } : a));
-  }
-
-  function uninstall(slug: string) {
-    setAddons((prev) => prev.filter((a) => a.slug !== slug));
-  }
 
   return (
     <>
       <PageTitle
         title="Addons"
         description="Manage installed addons and browse the store"
-        actions={
-          <Button variant="outline" size="sm">
-            <RefreshCw className="w-4 h-4" />
-            Reload
-          </Button>
-        }
+        actions={<Button variant="outline" size="sm"><RefreshCw className="w-4 h-4" />Reload</Button>}
       />
 
       <div className="flex border-b border-neutral-200 dark:border-neutral-800 mb-5">
         <span className="px-1 py-2.5 mr-5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">
           Installed <span className="ml-1 text-xs text-neutral-400">{addons.length}</span>
         </span>
-        <Link href="/admin/addons/store" className="px-1 py-2.5 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">
-          Store
-        </Link>
+        <Link href="/admin/addons/store" className="px-1 py-2.5 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">Store</Link>
       </div>
 
       {addons.length === 0 ? (
@@ -63,7 +43,6 @@ export default function AdminAddonsPage() {
             <input type="text" placeholder="Filter addons…" value={filter} onChange={(e) => setFilter(e.target.value)}
               className="w-56 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition" />
           </div>
-
           <div className="overflow-x-auto shadow-sm rounded-xl border border-neutral-200 dark:border-neutral-800/40">
             <table className="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
               <thead className="bg-neutral-50 dark:bg-neutral-800/50">

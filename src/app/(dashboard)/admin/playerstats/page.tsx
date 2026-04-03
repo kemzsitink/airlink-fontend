@@ -2,34 +2,33 @@
 
 import { RefreshCw, Users, Server, Activity, BarChart2 } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
-import { Button } from "@/components/ui/button";
+import { usePlayerStats } from "@/modules/analytics/hooks";
 import { cn } from "@/lib/utils";
 
-const mockStats = { totalPlayers: 24, maxCapacity: 200, onlineServers: 3, utilization: 12 };
-const mockServers = [
-  { serverName: "Minecraft SMP", serverId: "abc-123", online: true, playerCount: 18, maxPlayers: 100, version: "1.21.1" },
-  { serverName: "Velocity Proxy", serverId: "def-456", online: true, playerCount: 6, maxPlayers: 50, version: "3.3.0" },
-  { serverName: "Creative World", serverId: "ghi-789", online: false, playerCount: 0, maxPlayers: 50, version: "1.21.1" },
-];
-
-const statCards = [
-  { label: "Total Players", value: mockStats.totalPlayers, sub: "Players across all servers", icon: <Users className="w-5 h-5 text-neutral-400" /> },
-  { label: "Max Capacity", value: mockStats.maxCapacity, sub: "Total player capacity", icon: <Server className="w-5 h-5 text-neutral-400" /> },
-  { label: "Online Servers", value: mockStats.onlineServers, sub: "Servers currently online", icon: <Activity className="w-5 h-5 text-neutral-400" /> },
-  { label: "Utilization", value: `${mockStats.utilization}%`, sub: "Player capacity utilization", icon: <BarChart2 className="w-5 h-5 text-neutral-400" /> },
-];
-
 export default function AdminPlayerStatsPage() {
+  const { data, loading, refresh } = usePlayerStats();
+  const utilization = data.totalMaxPlayers > 0
+    ? Math.round((data.totalPlayers / data.totalMaxPlayers) * 100)
+    : 0;
+
+  const statCards = [
+    { label: "Total Players", value: data.totalPlayers, sub: "Players across all servers", icon: <Users className="w-5 h-5 text-neutral-400" /> },
+    { label: "Max Capacity", value: data.totalMaxPlayers, sub: "Total player capacity", icon: <Server className="w-5 h-5 text-neutral-400" /> },
+    { label: "Online Servers", value: data.onlineServers, sub: "Servers currently online", icon: <Activity className="w-5 h-5 text-neutral-400" /> },
+    { label: "Utilization", value: `${utilization}%`, sub: "Player capacity utilization", icon: <BarChart2 className="w-5 h-5 text-neutral-400" /> },
+  ];
+
   return (
     <>
       <PageTitle
         title="Player Statistics"
         description="View player statistics across all Minecraft servers"
         actions={
-          <Button variant="outline" size="sm">
-            <RefreshCw className="w-4 h-4" />
+          <button onClick={refresh}
+            className="border border-neutral-200 dark:border-neutral-800/20 block rounded-xl bg-white dark:bg-white/5 hover:bg-neutral-50 dark:hover:bg-white/10 text-neutral-800 dark:text-white px-3 py-2 text-sm font-medium shadow-lg transition flex items-center gap-1.5">
+            <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
             Refresh Data
-          </Button>
+          </button>
         }
       />
 
@@ -46,7 +45,6 @@ export default function AdminPlayerStatsPage() {
         ))}
       </div>
 
-      {/* Chart placeholder */}
       <div className="bg-neutral-800/20 border border-neutral-700/20 rounded-xl mb-8 p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-neutral-800 dark:text-white">Player Count History</h2>
@@ -57,7 +55,6 @@ export default function AdminPlayerStatsPage() {
         </div>
       </div>
 
-      {/* Server table */}
       <div className="bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-neutral-700/20 rounded-xl p-6">
         <h2 className="text-lg font-semibold text-neutral-800 dark:text-white mb-4">Server Player Counts</h2>
         <div className="overflow-x-auto">
@@ -70,7 +67,7 @@ export default function AdminPlayerStatsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700/20 bg-white dark:bg-transparent">
-              {mockServers.map((s) => (
+              {data.servers.map((s) => (
                 <tr key={s.serverId} className="hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <p className="text-sm font-medium text-neutral-800 dark:text-white">{s.serverName}</p>
@@ -78,7 +75,8 @@ export default function AdminPlayerStatsPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={cn("px-2 inline-flex text-xs leading-5 font-semibold rounded-full",
-                      s.online ? "text-emerald-700 dark:text-emerald-200 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/30" : "text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/30 border border-neutral-300 dark:border-neutral-700/30")}>
+                      s.online ? "text-emerald-700 dark:text-emerald-200 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/30"
+                        : "text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/30 border border-neutral-300 dark:border-neutral-700/30")}>
                       {s.online ? "Online" : "Offline"}
                     </span>
                   </td>

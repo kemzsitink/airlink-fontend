@@ -5,17 +5,11 @@ import Link from "next/link";
 import { Download, Search } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
-
-const storeImages = [
-  { slug: "minecraft-java", name: "Minecraft Java", author: "AirlinkLabs", description: "Minecraft Java Edition server", tags: ["minecraft", "java"], installed: true },
-  { slug: "velocity", name: "Velocity Proxy", author: "AirlinkLabs", description: "High-performance Minecraft proxy", tags: ["minecraft", "proxy"], installed: false },
-  { slug: "paper", name: "Paper MC", author: "community", description: "High-performance Paper server", tags: ["minecraft", "paper"], installed: false },
-  { slug: "nodejs", name: "Node.js", author: "AirlinkLabs", description: "Node.js application server", tags: ["nodejs", "web"], installed: false },
-];
+import { MOCK_STORE_IMAGES } from "@/modules/images/types";
 
 export default function AdminImageStorePage() {
   const [filter, setFilter] = useState("");
-  const filtered = storeImages.filter((i) =>
+  const filtered = MOCK_STORE_IMAGES.filter((i) =>
     `${i.name} ${i.description} ${i.tags.join(" ")}`.toLowerCase().includes(filter.toLowerCase())
   );
 
@@ -24,9 +18,7 @@ export default function AdminImageStorePage() {
       <PageTitle title="Image Store" description="Browse and install server images" />
 
       <div className="flex border-b border-neutral-200 dark:border-neutral-800 mb-5">
-        <Link href="/admin/images" className="px-1 py-2.5 mr-5 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">
-          Installed
-        </Link>
+        <Link href="/admin/images" className="px-1 py-2.5 mr-5 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">Installed</Link>
         <span className="px-1 py-2.5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">Store</span>
       </div>
 

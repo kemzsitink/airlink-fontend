@@ -3,15 +3,8 @@
 import { useState, use } from "react";
 import { Folder, FileText, FileCog, Image, Plus, Upload, Trash2, Pencil, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const mockFiles = [
-  { name: "plugins", type: "directory", size: 0 },
-  { name: "world", type: "directory", size: 0 },
-  { name: "server.jar", type: "file", category: "No Category", size: 45678901 },
-  { name: "server.properties", type: "file", category: "Configuration Files", size: 1234 },
-  { name: "eula.txt", type: "file", category: "Documents", size: 256 },
-  { name: "banner.png", type: "file", category: "Images", size: 98765 },
-];
+import { useFiles } from "@/modules/servers/hooks";
+import type { FileEntry } from "@/modules/servers/types";
 
 function formatSize(bytes: number) {
   if (bytes === 0) return "—";
@@ -30,6 +23,7 @@ function FileIcon({ type, category }: { type: string; category?: string }) {
 
 export default function ServerFilesPage({ params }: { params: Promise<{ uuid: string }> }) {
   const { uuid } = use(params);
+  const { files } = useFiles(uuid);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   function toggle(name: string) {
@@ -56,16 +50,14 @@ export default function ServerFilesPage({ params }: { params: Promise<{ uuid: st
         <table className="min-w-full bg-white dark:bg-neutral-900/60">
           <thead className="border-b border-neutral-200 dark:border-neutral-700/40">
             <tr>
-              <th className="px-4 py-2.5 text-left w-10">
-                <input type="checkbox" className="h-4 w-4 rounded border-neutral-300 dark:border-white/15" />
-              </th>
+              <th className="px-4 py-2.5 text-left w-10"><input type="checkbox" className="h-4 w-4 rounded border-neutral-300 dark:border-white/15" /></th>
               <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-500">Name</th>
               <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-500 w-24">Size</th>
               <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-500 w-32">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {mockFiles.map((file) => (
+            {files.map((file: FileEntry) => (
               <tr key={file.name} className="hover:bg-neutral-50 dark:hover:bg-white/[0.02] border-b border-neutral-100 dark:border-neutral-700/30 last:border-0 transition-colors">
                 <td className="px-4 py-3 w-10">
                   <input type="checkbox" checked={selected.has(file.name)} onChange={() => toggle(file.name)}
@@ -77,22 +69,14 @@ export default function ServerFilesPage({ params }: { params: Promise<{ uuid: st
                     <span>{file.name}</span>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap">
-                  {formatSize(file.size)}
-                </td>
+                <td className="px-4 py-3 text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap">{formatSize(file.size)}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1">
-                    <button className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors">
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
+                    <button className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
                     {file.type !== "directory" && (
-                      <button className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors">
-                        <Download className="w-3.5 h-3.5" />
-                      </button>
+                      <button className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"><Download className="w-3.5 h-3.5" /></button>
                     )}
-                    <button className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <button className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 </td>
               </tr>
