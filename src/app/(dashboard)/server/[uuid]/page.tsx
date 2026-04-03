@@ -90,25 +90,25 @@ export default function ServerConsolePage({
   return (
     <div className="flex flex-col lg:flex-row gap-5">
       {/* Console */}
-      <div className="w-full lg:w-2/3 flex flex-col">
-        <div className="flex flex-col rounded-xl overflow-hidden border border-neutral-800 shadow-lg flex-1">
+      <div className="w-full lg:w-2/3 flex flex-col min-w-0">
+        <div className="flex flex-col rounded-xl overflow-hidden border border-neutral-800 shadow-lg">
           <div className="flex items-center gap-2 px-3 py-2 bg-[#1c1c1c] border-b border-neutral-800 shrink-0">
             <span className="text-[11px] font-medium text-neutral-600 select-none tracking-wide">console</span>
           </div>
           <XTerm
             ref={termRef}
-            className="h-[420px]"
+            className="h-[420px] w-full"
+          />
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type a command..."
+            className="rounded-none border-0 border-t border-neutral-800 bg-[#1a1a1a] text-neutral-200 placeholder:text-neutral-600 focus-visible:ring-0 focus-visible:border-neutral-700 font-mono text-sm"
+            autoComplete="off"
+            spellCheck={false}
           />
         </div>
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type a command..."
-          className="rounded-none rounded-b-xl border-t-0 bg-neutral-900 border-neutral-800 text-neutral-200 placeholder:text-neutral-600 focus-visible:ring-0 focus-visible:border-neutral-700"
-          autoComplete="off"
-          spellCheck={false}
-        />
       </div>
 
       {/* Stats */}
