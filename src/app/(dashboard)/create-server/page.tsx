@@ -3,6 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const mockNodes = [{ id: 1, name: "Node-1", address: "127.0.0.1" }];
 const mockImages = [{ id: 1, name: "Minecraft Java", dockerImages: ["ghcr.io/airlinklabs/java:21", "ghcr.io/airlinklabs/java:17"] }];
@@ -12,7 +15,7 @@ export default function CreateServerPage() {
   const [memory, setMemory] = useState(512);
   const [cpu, setCpu] = useState(100);
   const [storage, setStorage] = useState(5);
-  const [error, setError] = useState("");
+  const [error] = useState("");
 
   function step(setter: (v: number) => void, current: number, delta: number, min: number, max: number) {
     setter(Math.max(min, Math.min(max, current + delta)));
@@ -36,15 +39,13 @@ export default function CreateServerPage() {
               <p className="text-sm font-medium text-neutral-800 dark:text-white">Details</p>
             </div>
             <div className="p-5 space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">Name</label>
-                <input type="text" placeholder="My server" maxLength={64}
-                  className="w-full px-3.5 py-2.5 rounded-[10px] border border-neutral-200 dark:border-white/8 bg-neutral-50 dark:bg-white/8 text-sm text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 outline-none focus:border-neutral-400 dark:focus:border-white/20 transition" />
+              <div className="space-y-1.5">
+                <Label>Name</Label>
+                <Input placeholder="My server" maxLength={64} />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">Description <span className="text-neutral-400 font-normal">(optional)</span></label>
-                <input type="text" placeholder="What is this for?" maxLength={128}
-                  className="w-full px-3.5 py-2.5 rounded-[10px] border border-neutral-200 dark:border-white/8 bg-neutral-50 dark:bg-white/8 text-sm text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 outline-none focus:border-neutral-400 dark:focus:border-white/20 transition" />
+              <div className="space-y-1.5">
+                <Label>Description <span className="text-neutral-400 font-normal">(optional)</span></Label>
+                <Input placeholder="What is this for?" maxLength={128} />
               </div>
             </div>
           </div>
@@ -55,55 +56,67 @@ export default function CreateServerPage() {
               <p className="text-sm font-medium text-neutral-800 dark:text-white">Node & image</p>
             </div>
             <div className="p-5 space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">Node</label>
-                <select className="w-full px-3.5 py-2.5 rounded-[10px] border border-neutral-200 dark:border-white/8 bg-neutral-50 dark:bg-white/8 text-sm text-neutral-900 dark:text-neutral-100 outline-none focus:border-neutral-400 dark:focus:border-white/20 transition">
-                  <option value="">Select a node</option>
-                  {mockNodes.map((n) => <option key={n.id} value={n.id}>{n.name} — {n.address}</option>)}
-                </select>
+              <div className="space-y-1.5">
+                <Label>Node</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Select a node" /></SelectTrigger>
+                  <SelectContent>
+                    {mockNodes.map((n) => (
+                      <SelectItem key={n.id} value={String(n.id)}>{n.name} — {n.address}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">Image</label>
-                  <select className="w-full px-3.5 py-2.5 rounded-[10px] border border-neutral-200 dark:border-white/8 bg-neutral-50 dark:bg-white/8 text-sm text-neutral-900 dark:text-neutral-100 outline-none focus:border-neutral-400 dark:focus:border-white/20 transition">
-                    <option value="">Select an image</option>
-                    {mockImages.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
-                  </select>
+                <div className="space-y-1.5">
+                  <Label>Image</Label>
+                  <Select>
+                    <SelectTrigger><SelectValue placeholder="Select an image" /></SelectTrigger>
+                    <SelectContent>
+                      {mockImages.map((i) => (
+                        <SelectItem key={i.id} value={String(i.id)}>{i.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">Docker variant</label>
-                  <select className="w-full px-3.5 py-2.5 rounded-[10px] border border-neutral-200 dark:border-white/8 bg-neutral-50 dark:bg-white/8 text-sm text-neutral-900 dark:text-neutral-100 outline-none focus:border-neutral-400 dark:focus:border-white/20 transition">
-                    <option value="">Select image first</option>
-                    {mockImages[0].dockerImages.map((d) => <option key={d} value={d}>{d}</option>)}
-                  </select>
+                <div className="space-y-1.5">
+                  <Label>Docker variant</Label>
+                  <Select>
+                    <SelectTrigger><SelectValue placeholder="Select image first" /></SelectTrigger>
+                    <SelectContent>
+                      {mockImages[0].dockerImages.map((d) => (
+                        <SelectItem key={d} value={d}>{d}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Resources */}
+        {/* Resources — stepper keeps custom UI, just wraps Input */}
         <div className="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
           <div className="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
             <p className="text-sm font-medium text-neutral-800 dark:text-white">Resources</p>
           </div>
           <div className="p-5 grid grid-cols-3 gap-4">
             {[
-              { label: "RAM (MB)", value: memory, setter: setMemory, step: 128, min: 128, max: resourceLimits.maxMemory, hint: `Max ${resourceLimits.maxMemory} MB` },
-              { label: "CPU (%)", value: cpu, setter: setCpu, step: 50, min: 50, max: resourceLimits.maxCpu, hint: "50% = half a core" },
-              { label: "Storage (GB)", value: storage, setter: setStorage, step: 1, min: 1, max: resourceLimits.maxStorage, hint: `Max ${resourceLimits.maxStorage} GB` },
+              { label: "RAM (MB)", value: memory, setter: setMemory, stepVal: 128, min: 128, max: resourceLimits.maxMemory, hint: `Max ${resourceLimits.maxMemory} MB` },
+              { label: "CPU (%)", value: cpu, setter: setCpu, stepVal: 50, min: 50, max: resourceLimits.maxCpu, hint: "50% = half a core" },
+              { label: "Storage (GB)", value: storage, setter: setStorage, stepVal: 1, min: 1, max: resourceLimits.maxStorage, hint: `Max ${resourceLimits.maxStorage} GB` },
             ].map((r) => (
-              <div key={r.label}>
-                <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">{r.label}</label>
-                <div className="flex items-center border border-neutral-200 dark:border-white/8 rounded-[10px] overflow-hidden bg-neutral-50 dark:bg-white/6">
-                  <button type="button" onClick={() => step(r.setter, r.value, -r.step, r.min, r.max)}
-                    className="px-3 py-2.5 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/7 transition text-base leading-none">−</button>
+              <div key={r.label} className="space-y-1.5">
+                <Label>{r.label}</Label>
+                <div className="flex items-center border border-input rounded-lg overflow-hidden bg-background">
+                  <button type="button" onClick={() => step(r.setter, r.value, -r.stepVal, r.min, r.max)}
+                    className="px-3 py-2 text-muted-foreground hover:bg-muted transition text-base leading-none">−</button>
                   <input type="number" value={r.value} onChange={(e) => r.setter(Number(e.target.value))}
-                    className="flex-1 text-center bg-transparent text-sm font-medium text-neutral-800 dark:text-white outline-none py-2.5" />
-                  <button type="button" onClick={() => step(r.setter, r.value, r.step, r.min, r.max)}
-                    className="px-3 py-2.5 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/7 transition text-base leading-none">+</button>
+                    className="flex-1 text-center bg-transparent text-sm font-medium text-foreground outline-none py-2" />
+                  <button type="button" onClick={() => step(r.setter, r.value, r.stepVal, r.min, r.max)}
+                    className="px-3 py-2 text-muted-foreground hover:bg-muted transition text-base leading-none">+</button>
                 </div>
-                <p className="text-[11px] text-neutral-400 mt-1.5">{r.hint}</p>
+                <p className="text-[11px] text-neutral-400">{r.hint}</p>
               </div>
             ))}
           </div>

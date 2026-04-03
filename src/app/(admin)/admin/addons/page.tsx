@@ -5,6 +5,7 @@ import Link from "next/link";
 import { RefreshCw, Trash2, Store } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAddons, useToggleAddon, useUninstallAddon } from "@/modules/addons/hooks";
 import { cn } from "@/lib/utils";
 
@@ -42,8 +43,7 @@ export default function AdminAddonsPage() {
       ) : (
         <>
           <div className="mb-4">
-            <input type="text" placeholder="Filter addons…" value={filter} onChange={(e) => setFilter(e.target.value)}
-              className="w-56 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition" />
+            <Input placeholder="Filter addons…" value={filter} onChange={(e) => setFilter(e.target.value)} className="w-56" />
           </div>
           <div className="overflow-x-auto shadow-sm rounded-xl border border-neutral-200 dark:border-neutral-800/40">
             <table className="min-w-full divide-y divide-neutral-200 dark:divide-white/10">

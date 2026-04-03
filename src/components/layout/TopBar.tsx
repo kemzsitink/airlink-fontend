@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export function TopBar() {
   const [query, setQuery] = useState("");
@@ -36,10 +37,10 @@ export function TopBar() {
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
         <div className="relative flex flex-1 flex-col" ref={ref}>
           <div className="lg:-ml-2 flex items-center w-fit mt-3.5 px-4 py-2 h-10 rounded-xl border border-neutral-300 dark:border-white/5 hover:border-neutral-400 dark:hover:border-neutral-300/10 bg-transparent text-neutral-800 dark:text-white">
-            <Search className="h-5 w-5 text-neutral-400" />
-            <input
+            <Search className="h-5 w-5 text-neutral-400 shrink-0" />
+            <Input
               id="searchInput"
-              className="bg-transparent border-transparent ml-2 focus-visible:ring-transparent border-none ring-transparent sm:text-sm placeholder:text-zinc-500 text-neutral-700 dark:text-neutral-300 focus-visible:outline-none"
+              className="bg-transparent border-none shadow-none ring-0 focus-visible:ring-0 ml-1 h-auto py-0 text-sm placeholder:text-zinc-500 text-neutral-700 dark:text-neutral-300"
               placeholder="Search"
               type="search"
               name="search"
@@ -48,7 +49,7 @@ export function TopBar() {
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setOpen(true)}
             />
-            <div className="ml-2 px-1 py-0.5 text-[10px] w-[55px] font-medium text-neutral-700 dark:text-neutral-400 bg-neutral-200 dark:bg-neutral-800 rounded-md border border-neutral-300 dark:border-neutral-700">
+            <div className="ml-2 px-1 py-0.5 text-[10px] w-[55px] font-medium text-neutral-700 dark:text-neutral-400 bg-neutral-200 dark:bg-neutral-800 rounded-md border border-neutral-300 dark:border-neutral-700 shrink-0">
               CTRL + K
             </div>
           </div>

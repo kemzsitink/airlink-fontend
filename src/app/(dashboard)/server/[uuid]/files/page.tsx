@@ -3,6 +3,7 @@
 import { useState, use } from "react";
 import { Folder, FileText, FileCog, Image, Plus, Upload, Trash2, Pencil, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useFiles } from "@/modules/servers/hooks";
 import type { FileEntry } from "@/modules/servers/types";
 
@@ -50,7 +51,7 @@ export default function ServerFilesPage({ params }: { params: Promise<{ uuid: st
         <table className="min-w-full bg-white dark:bg-neutral-900/60">
           <thead className="border-b border-neutral-200 dark:border-neutral-700/40">
             <tr>
-              <th className="px-4 py-2.5 text-left w-10"><input type="checkbox" className="h-4 w-4 rounded border-neutral-300 dark:border-white/15" /></th>
+              <th className="px-4 py-2.5 text-left w-10"><Checkbox /></th>
               <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-500">Name</th>
               <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-500 w-24">Size</th>
               <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-500 w-32">Actions</th>
@@ -60,8 +61,7 @@ export default function ServerFilesPage({ params }: { params: Promise<{ uuid: st
             {files.map((file: FileEntry) => (
               <tr key={file.name} className="hover:bg-neutral-50 dark:hover:bg-white/[0.02] border-b border-neutral-100 dark:border-neutral-700/30 last:border-0 transition-colors">
                 <td className="px-4 py-3 w-10">
-                  <input type="checkbox" checked={selected.has(file.name)} onChange={() => toggle(file.name)}
-                    className="h-4 w-4 rounded border-neutral-300 dark:border-white/10" />
+                  <Checkbox checked={selected.has(file.name)} onCheckedChange={() => toggle(file.name)} />
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2.5 text-sm font-medium text-neutral-800 dark:text-neutral-200 cursor-pointer hover:text-neutral-600 dark:hover:text-white transition-colors">

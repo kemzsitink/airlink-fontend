@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const fields = [
   { id: "name", label: "Name", placeholder: "My node", type: "text" },
@@ -27,10 +29,9 @@ export default function AdminCreateNodePage() {
       <div className="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5 max-w-2xl">
         <div className="grid grid-cols-2 gap-4">
           {fields.map((f) => (
-            <div key={f.id}>
-              <label htmlFor={f.id} className="block text-sm font-medium text-neutral-700 dark:text-neutral-400 mb-2">{f.label}:</label>
-              <input id={f.id} type={f.type} placeholder={f.placeholder}
-                className="rounded-xl text-neutral-800 dark:text-white text-sm w-full px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-500/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/20" />
+            <div key={f.id} className="space-y-1.5">
+              <Label htmlFor={f.id}>{f.label}</Label>
+              <Input id={f.id} type={f.type} placeholder={f.placeholder} />
             </div>
           ))}
           <div className="col-span-2">

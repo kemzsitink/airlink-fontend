@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Download, Search } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { MOCK_STORE_IMAGES } from "@/modules/images/types";
 
 export default function AdminImageStorePage() {
@@ -23,9 +24,8 @@ export default function AdminImageStorePage() {
       </div>
 
       <div className="relative mb-5 max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-        <input type="text" placeholder="Search images…" value={filter} onChange={(e) => setFilter(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+        <Input placeholder="Search images…" value={filter} onChange={(e) => setFilter(e.target.value)} className="pl-9" />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

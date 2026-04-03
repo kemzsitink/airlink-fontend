@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { Upload, Coins } from "lucide-react";
-import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCurrentUser } from "@/modules/auth/hooks";
 import { MOCK_USER, MOCK_LOGIN_HISTORY } from "@/modules/auth/types";
 
@@ -39,36 +41,43 @@ export default function AccountPage() {
             <div>
               <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Username</label>
               <div className="flex gap-1.5">
-                <input type="text" defaultValue={user.username} className="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700/20 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors" />
-                <Button size="sm" className="shrink-0 text-xs h-7">Save</Button>
+                <Input defaultValue={user.username} className="h-7 text-xs" />
+                <Button className="shrink-0 text-xs h-7">Save</Button>
               </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Email</label>
               <div className="flex gap-1.5">
-                <input type="email" defaultValue={user.email} className="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700/20 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors" />
-                <Button size="sm" className="shrink-0 text-xs h-7">Save</Button>
+                <Input type="email" defaultValue={user.email} className="h-7 text-xs" />
+                <Button className="shrink-0 text-xs h-7">Save</Button>
               </div>
             </div>
             <div className="col-span-2">
               <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Change password</label>
               <div className="grid grid-cols-2 gap-1.5">
-                <input type="password" placeholder="Current password" className="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700/20 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors" />
-                <input type="password" placeholder="New password" className="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700/20 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors" />
+                <Input type="password" placeholder="Current password" className="h-7 text-xs" />
+                <Input type="password" placeholder="New password" className="h-7 text-xs" />
               </div>
-              <Button size="sm" className="mt-2 text-xs h-7">Update password</Button>
+              <Button className="mt-2 text-xs h-7">Update password</Button>
             </div>
             <div className="col-span-2">
               <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Description</label>
-              <textarea rows={2} defaultValue={user.description ?? ""} className="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700/20 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors resize-none" />
-              <Button size="sm" className="mt-1.5 text-xs h-7">Save</Button>
+              <Textarea rows={2} defaultValue={user.description ?? ""} className="text-xs resize-none" />
+              <Button className="mt-1.5 text-xs h-7">Save</Button>
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Language</label>
-              <select defaultValue={user.lang ?? "en"} className="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700/20 px-3 py-1.5 text-neutral-800 dark:text-white transition-colors mb-1.5">
-                {languages.map((l) => <option key={l} value={l}>{langLabels[l]}</option>)}
-              </select>
-              <Button size="sm" className="text-xs h-7">Save</Button>
+              <Select defaultValue={user.lang ?? "en"}>
+                <SelectTrigger className="h-7 text-xs mb-1.5">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {languages.map((l) => (
+                    <SelectItem key={l} value={l}>{langLabels[l]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button className="text-xs h-7">Save</Button>
             </div>
           </div>
         </div>
@@ -100,3 +109,4 @@ export default function AccountPage() {
     </>
   );
 }
+

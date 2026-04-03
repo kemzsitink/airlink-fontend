@@ -5,6 +5,9 @@ import Link from "next/link";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useImage } from "@/modules/images/hooks";
 
 export default function AdminEditImagePage({ params }: { params: Promise<{ id: string }> }) {
@@ -26,21 +29,21 @@ export default function AdminEditImagePage({ params }: { params: Promise<{ id: s
         <div className="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5">
           <h2 className="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">General</h2>
           <div className="grid grid-cols-2 gap-4 px-5 py-5">
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Name</label>
-              <input type="text" defaultValue={image.name} className="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors" />
+            <div className="space-y-1.5">
+              <Label>Name</Label>
+              <Input defaultValue={image.name} />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Author</label>
-              <input type="text" defaultValue={image.author ?? ""} className="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors" />
+            <div className="space-y-1.5">
+              <Label>Author</Label>
+              <Input defaultValue={image.author ?? ""} />
             </div>
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Startup Command</label>
-              <input type="text" defaultValue={image.startup} className="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white font-mono transition-colors" />
+            <div className="col-span-2 space-y-1.5">
+              <Label>Startup Command</Label>
+              <Input defaultValue={image.startup} className="font-mono" />
             </div>
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Description</label>
-              <textarea rows={2} defaultValue={image.description ?? ""} className="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors resize-none" />
+            <div className="col-span-2 space-y-1.5">
+              <Label>Description</Label>
+              <Textarea rows={2} defaultValue={image.description ?? ""} className="resize-none" />
             </div>
           </div>
         </div>
@@ -53,7 +56,7 @@ export default function AdminEditImagePage({ params }: { params: Promise<{ id: s
           <div className="px-5 py-5 space-y-2">
             {image.dockerImages.map((img, i) => (
               <div key={i} className="flex items-center gap-2">
-                <input type="text" defaultValue={Object.keys(img)[0]} className="flex-1 rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white font-mono transition-colors" />
+                <Input defaultValue={Object.keys(img)[0]} className="font-mono" />
                 <Button variant="destructive" size="icon" className="h-8 w-8 shrink-0"><Trash2 className="w-4 h-4" /></Button>
               </div>
             ))}
@@ -68,18 +71,18 @@ export default function AdminEditImagePage({ params }: { params: Promise<{ id: s
           <div className="px-5 py-5 space-y-4">
             {image.variables.map((v, i) => (
               <div key={i} className="grid grid-cols-3 gap-3 items-end">
-                <div>
-                  <label className="block text-xs font-medium text-neutral-500 mb-1">Name</label>
-                  <input type="text" defaultValue={v.name} className="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-3 py-2 text-neutral-800 dark:text-white transition-colors" />
+                <div className="space-y-1.5">
+                  <Label>Name</Label>
+                  <Input defaultValue={v.name} />
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-neutral-500 mb-1">Env Variable</label>
-                  <input type="text" defaultValue={v.env} className="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-3 py-2 text-neutral-800 dark:text-white font-mono transition-colors" />
+                <div className="space-y-1.5">
+                  <Label>Env Variable</Label>
+                  <Input defaultValue={v.env} className="font-mono" />
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-neutral-500 mb-1">Default Value</label>
+                <div className="space-y-1.5">
+                  <Label>Default Value</Label>
                   <div className="flex gap-2">
-                    <input type="text" defaultValue={v.value} className="flex-1 rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-3 py-2 text-neutral-800 dark:text-white transition-colors" />
+                    <Input defaultValue={v.value} className="flex-1" />
                     <Button variant="destructive" size="icon" className="h-9 w-9 shrink-0"><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </div>

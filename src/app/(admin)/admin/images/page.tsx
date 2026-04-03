@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, Upload, Store } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useImages } from "@/modules/images/hooks";
 
 export default function AdminImagesPage() {
@@ -38,8 +39,7 @@ export default function AdminImagesPage() {
       </div>
 
       <div className="mb-4">
-        <input type="text" placeholder="Filter images…" value={filter} onChange={(e) => setFilter(e.target.value)}
-          className="w-56 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition" />
+        <Input placeholder="Filter images…" value={filter} onChange={(e) => setFilter(e.target.value)} className="w-56" />
       </div>
 
       <div className="overflow-x-auto shadow-sm rounded-xl border border-neutral-200 dark:border-neutral-800/40">

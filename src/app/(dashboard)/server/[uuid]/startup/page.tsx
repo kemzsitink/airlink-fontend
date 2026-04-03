@@ -2,6 +2,8 @@
 
 import { use } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useStartup } from "@/modules/servers/hooks";
 
 export default function ServerStartupPage({ params }: { params: Promise<{ uuid: string }> }) {
@@ -21,13 +23,12 @@ export default function ServerStartupPage({ params }: { params: Promise<{ uuid: 
         <h2 className="text-sm font-medium text-neutral-800 dark:text-white mb-4">Variables</h2>
         <div className="space-y-4">
           {startup.variables.map((v) => (
-            <div key={v.env}>
-              <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+            <div key={v.env} className="space-y-1.5">
+              <Label>
                 {v.name}
-                <span className="ml-2 text-neutral-400 font-normal">{v.description}</span>
-              </label>
-              <input type="text" defaultValue={v.value} disabled={!v.editable}
-                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white disabled:opacity-50 transition-colors" />
+                <span className="ml-2 text-neutral-400 font-normal text-xs">{v.description}</span>
+              </Label>
+              <Input defaultValue={v.value} disabled={!v.editable} />
             </div>
           ))}
         </div>
