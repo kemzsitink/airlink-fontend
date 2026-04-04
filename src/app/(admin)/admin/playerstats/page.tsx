@@ -68,7 +68,7 @@ export default function AdminPlayerStatsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700/20 bg-white dark:bg-transparent">
-              {data.servers.map((s: { serverId: string; serverName: string; online: boolean; playerCount: number; maxPlayers: number; version?: string }) => (
+              {data.servers.map((s: { serverId: string; serverName: string; online: boolean; onlinePlayers: number; maxPlayers: number; version?: string }) => (
                 <tr key={s.serverId} className="hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <p className="text-sm font-medium text-neutral-800 dark:text-white">{s.serverName}</p>
@@ -81,7 +81,7 @@ export default function AdminPlayerStatsPage() {
                       {s.online ? "Online" : "Offline"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700 dark:text-white">{s.playerCount} / {s.maxPlayers}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700 dark:text-white">{s.onlinePlayers} / {s.maxPlayers}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-400">{s.version}</td>
                 </tr>
               ))}

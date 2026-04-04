@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useRef } from "react";
 import { Folder, FileText, FileCog, Image, Plus, Upload, Trash2, Pencil, Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,8 @@ export default function ServerFilesPage({ params }: { params: Promise<{ uuid: st
   const { data: files = [] } = useFiles(uuid);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const uploadRef = useRef<HTMLInputElement>(null);
   const qc = useQueryClient();
 
   function toggle(name: string) {
@@ -66,6 +68,31 @@ export default function ServerFilesPage({ params }: { params: Promise<{ uuid: st
     }
   }
 
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+      const form = new FormData();
+      form.append("file", file);
+      form.append("path", "/");
+      const res = await fetch(`${apiUrl}/servers/${uuid}/files/upload`, {
+        method: "POST",
+        credentials: "include",
+        body: form,
+      });
+      if (!res.ok) throw new Error();
+      qc.invalidateQueries({ queryKey: serverKeys.files(uuid) });
+      toast.success(`Uploaded ${file.name}`);
+    } catch {
+      toast.error("Upload failed");
+    } finally {
+      setUploading(false);
+      if (uploadRef.current) uploadRef.current.value = "";
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -74,7 +101,10 @@ export default function ServerFilesPage({ params }: { params: Promise<{ uuid: st
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm"><Plus className="w-4 h-4" />New File</Button>
-          <Button variant="outline" size="sm"><Upload className="w-4 h-4" />Upload</Button>
+          <input ref={uploadRef} type="file" className="hidden" onChange={handleUpload} />
+          <Button variant="outline" size="sm" onClick={() => uploadRef.current?.click()} disabled={uploading}>
+            <Upload className="w-4 h-4" />{uploading ? "Uploading…" : "Upload"}
+          </Button>
         </div>
       </div>
 
@@ -105,7 +135,15 @@ export default function ServerFilesPage({ params }: { params: Promise<{ uuid: st
                   <div className="flex items-center gap-1">
                     <button className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
                     {file.type !== "directory" && (
-                      <button className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"><Download className="w-3.5 h-3.5" /></button>
+                      <button
+                        onClick={() => {
+                          const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+                          window.open(`${apiUrl}/servers/${uuid}/files/download?path=${encodeURIComponent(file.name)}`, "_blank");
+                        }}
+                        className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                      </button>
                     )}
                     <button
                       onClick={() => handleDeleteSingle(file.name)}

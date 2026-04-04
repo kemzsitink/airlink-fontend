@@ -1,16 +1,33 @@
-const mockPlayers = [
-  { name: "Steve", uuid: "abc-123", online: true, playtime: "12h 30m" },
-  { name: "Alex", uuid: "def-456", online: false, playtime: "5h 10m" },
-];
+"use client";
 
-export default function ServerPlayersPage() {
+import { use } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { serversApi } from "@/modules/servers/api";
+
+export default function ServerPlayersPage({ params }: { params: Promise<{ uuid: string }> }) {
+  const { uuid } = use(params);
+  const { data, isLoading } = useQuery({
+    queryKey: ["servers", uuid, "players"],
+    queryFn: () => serversApi.getPlayers(uuid),
+    refetchInterval: 10000,
+  });
+
+  const players: { name: string; uuid: string; online: boolean; playtime?: string }[] =
+    data?.players ?? [];
+  const onlineCount = data?.onlinePlayers ?? 0;
+  const maxPlayers = data?.maxPlayers ?? 0;
+
+  if (isLoading) return <p className="text-sm text-neutral-500">Loading...</p>;
+
   return (
     <div>
       <div className="mb-4">
-        <p className="text-sm text-neutral-500">{mockPlayers.filter((p) => p.online).length} online · {mockPlayers.length} total</p>
+        <p className="text-sm text-neutral-500">
+          {onlineCount} / {maxPlayers} online · {players.length} total
+        </p>
       </div>
 
-      {mockPlayers.length === 0 ? (
+      {players.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <p className="text-sm text-neutral-500">No player data available.</p>
         </div>
@@ -25,7 +42,7 @@ export default function ServerPlayersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
-              {mockPlayers.map((p) => (
+              {players.map((p) => (
                 <tr key={p.uuid} className="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition-colors">
                   <td className="py-3 px-4 text-sm font-medium text-neutral-800 dark:text-white">{p.name}</td>
                   <td className="py-3 px-4 text-sm">
@@ -34,7 +51,7 @@ export default function ServerPlayersPage() {
                       {p.online ? "Online" : "Offline"}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-sm text-neutral-600 dark:text-neutral-400">{p.playtime}</td>
+                  <td className="py-3 px-4 text-sm text-neutral-600 dark:text-neutral-400">{p.playtime ?? "—"}</td>
                 </tr>
               ))}
             </tbody>

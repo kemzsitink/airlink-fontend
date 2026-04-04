@@ -55,4 +55,26 @@ export const serversApi = {
     apiRequest<void>(`/servers/${id}`, { method: 'PATCH', body: payload }),
   adminDelete: (id: number) =>
     apiRequest<void>(`/servers/${id}`, { method: 'DELETE' }),
+
+  // Players / Worlds
+  getPlayers: (uuid: string) =>
+    apiRequest<{ online: boolean; players: { name: string; uuid: string; online: boolean; playtime?: string }[]; onlinePlayers: number; maxPlayers: number }>(
+      `/servers/${uuid}/players`
+    ),
+  getWorlds: (uuid: string) =>
+    apiRequest<{ worlds: { name: string; type?: string; size?: string }[] }>(
+      `/servers/${uuid}/worlds`
+    ),
+
+  // SFTP
+  getSftpCredentials: (uuid: string) =>
+    apiRequest<{ username: string; password: string; host: string; port: number; expiresAt?: string }>(
+      `/servers/${uuid}/sftp/credentials`
+    ),
+  generateSftpCredentials: (uuid: string) =>
+    apiRequest<{ username: string; password: string; host: string; port: number; expiresAt?: string }>(
+      `/servers/${uuid}/sftp/credentials`, { method: 'POST' }
+    ),
+  revokeSftpCredentials: (uuid: string) =>
+    apiRequest<void>(`/servers/${uuid}/sftp/credentials`, { method: 'DELETE' }),
 }

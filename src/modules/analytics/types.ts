@@ -2,13 +2,13 @@ export interface AnalyticsSummary {
   servers: {
     total: number;
     suspended: number;
+    installing: number;
     totalRamMb: number;
     totalCpuPct: number;
     totalStorageGb: number;
-    topImages: { name: string; count: number }[];
-    topServers: { name: string; owner: string; image: string; memory: number; cpu: number; storage: number; suspended: boolean }[];
   };
   nodes: {
+    id: number;
     name: string;
     address: string;
     port: number;
@@ -32,11 +32,12 @@ export interface PlayerStats {
   totalPlayers: number;
   totalMaxPlayers: number;
   onlineServers: number;
+  totalServers: number;
   servers: {
     serverName: string;
     serverId: string;
     online: boolean;
-    playerCount: number;
+    onlinePlayers: number;
     maxPlayers: number;
     version?: string;
   }[];
