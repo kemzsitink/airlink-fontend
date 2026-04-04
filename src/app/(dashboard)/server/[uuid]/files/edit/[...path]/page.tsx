@@ -1,28 +1,36 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const mockContent = `# Server Properties
-server-port=25565
-max-players=20
-difficulty=normal
-gamemode=survival
-level-name=world
-motd=A Minecraft Server
-`;
+import { serversApi } from "@/modules/servers/api";
+import { toast } from "sonner";
 
 export default function FileEditorPage({ params }: { params: Promise<{ uuid: string; path: string[] }> }) {
   const { uuid, path } = use(params);
-  const [content, setContent] = useState(mockContent);
-  const [saved, setSaved] = useState(false);
   const filePath = path.join("/");
+  const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  function save() {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  useEffect(() => {
+    serversApi.getFile(uuid, filePath)
+      .then((data) => setContent(data.content))
+      .catch(() => toast.error("Failed to load file"))
+      .finally(() => setLoading(false));
+  }, [uuid, filePath]);
+
+  async function save() {
+    setSaving(true);
+    try {
+      await serversApi.saveFile(uuid, filePath, content);
+      toast.success("File saved");
+    } catch {
+      toast.error("Failed to save file");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -37,9 +45,9 @@ export default function FileEditorPage({ params }: { params: Promise<{ uuid: str
             <p className="text-xs text-neutral-500 font-mono mt-0.5">/home/container/{filePath}</p>
           </div>
         </div>
-        <Button size="sm" onClick={save}>
+        <Button size="sm" onClick={save} disabled={saving || loading}>
           <Save className="w-4 h-4" />
-          {saved ? "Saved!" : "Save"}
+          {saving ? "Saving…" : "Save"}
         </Button>
       </div>
 
@@ -47,13 +55,19 @@ export default function FileEditorPage({ params }: { params: Promise<{ uuid: str
         <div className="flex items-center gap-2 px-3 py-2 bg-[#1c1c1c] border-b border-neutral-800">
           <span className="text-[11px] font-medium text-neutral-600 select-none tracking-wide">{filePath}</span>
         </div>
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="w-full bg-[#141414] text-neutral-300 font-mono text-xs p-4 resize-none focus:outline-none"
-          style={{ minHeight: "500px" }}
-          spellCheck={false}
-        />
+        {loading ? (
+          <div className="w-full bg-[#141414] flex items-center justify-center" style={{ minHeight: "500px" }}>
+            <p className="text-neutral-500 text-sm">Loading...</p>
+          </div>
+        ) : (
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="w-full bg-[#141414] text-neutral-300 font-mono text-xs p-4 resize-none focus:outline-none"
+            style={{ minHeight: "500px" }}
+            spellCheck={false}
+          />
+        )}
       </div>
     </div>
   );

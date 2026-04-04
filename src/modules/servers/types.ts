@@ -5,10 +5,15 @@ export interface Server {
   description?: string;
   status: "running" | "stopped" | "starting" | "stopping";
   Suspended: boolean;
-  ramUsage: number;
-  cpuUsage: number;
-  ramUsed?: string;
+  Installing?: boolean;
+  Queued?: boolean;
+  Memory: number;
+  Cpu: number;
+  Storage: number;
   Ports: string;
+  ramUsage?: number;
+  cpuUsage?: number;
+  ramUsed?: string;
   owner: { id: number; username: string; avatar?: string };
   node: { id: number; name: string; address: string };
   image: { id: number; name: string };

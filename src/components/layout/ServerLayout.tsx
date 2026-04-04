@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Terminal, FolderOpen, HardDrive, Settings, Play, Users, Globe } from "lucide-react";
+import { serversApi } from "@/modules/servers/api";
+import { toast } from "sonner";
 
 interface ServerLayoutProps {
   children: React.ReactNode;
@@ -26,6 +29,19 @@ const tabs = [
 export function ServerLayout({ children, serverUUID, serverName, serverDescription, status = "stopped" }: ServerLayoutProps) {
   const pathname = usePathname();
   const base = `/server/${serverUUID}`;
+  const [powerLoading, setPowerLoading] = useState<string | null>(null);
+
+  async function handlePower(action: "start" | "stop" | "restart") {
+    setPowerLoading(action);
+    try {
+      await serversApi[action](serverUUID);
+      toast.success(`Server ${action} sent`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : `Failed to ${action} server`);
+    } finally {
+      setPowerLoading(null);
+    }
+  }
 
   return (
     <div>
@@ -50,9 +66,27 @@ export function ServerLayout({ children, serverUUID, serverName, serverDescripti
 
         {/* Power buttons */}
         <div className="flex gap-2 shrink-0">
-          <button className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow-sm transition">Start</button>
-          <button className="rounded-xl bg-neutral-800 dark:bg-neutral-600 hover:bg-neutral-700 text-white px-3 py-2 text-sm font-medium shadow-sm transition">Restart</button>
-          <button className="rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-sm transition">Stop</button>
+          <button
+            onClick={() => handlePower("start")}
+            disabled={!!powerLoading || status === "running"}
+            className="rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-2 text-sm font-medium shadow-sm transition"
+          >
+            {powerLoading === "start" ? "…" : "Start"}
+          </button>
+          <button
+            onClick={() => handlePower("restart")}
+            disabled={!!powerLoading}
+            className="rounded-xl bg-neutral-800 dark:bg-neutral-600 hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-2 text-sm font-medium shadow-sm transition"
+          >
+            {powerLoading === "restart" ? "…" : "Restart"}
+          </button>
+          <button
+            onClick={() => handlePower("stop")}
+            disabled={!!powerLoading || status === "stopped"}
+            className="rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-2 text-sm font-medium shadow-sm transition"
+          >
+            {powerLoading === "stop" ? "…" : "Stop"}
+          </button>
         </div>
       </div>
 

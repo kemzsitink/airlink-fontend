@@ -34,6 +34,8 @@ export default function AdminEditServerPage({ params }: { params: Promise<{ id: 
         name: nameRef.current?.value || undefined,
         description: descRef.current?.value || undefined,
         Suspended: suspended,
+        Cpu: cpuRef.current?.value ? Number(cpuRef.current.value) : undefined,
+        Memory: memoryRef.current?.value ? Number(memoryRef.current.value) : undefined,
       });
       toast.success("Server updated");
     } catch {

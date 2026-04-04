@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { LayoutGrid, List, FolderPlus, Plus } from "lucide-react";
+import { toast } from "sonner";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { ServerCard } from "@/components/server/ServerCard";
 import { ServerListRow } from "@/components/server/ServerListRow";
@@ -30,7 +31,7 @@ export default function DashboardPage() {
                 </Link>
               </Button>
             )}
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => toast.info("Folder system coming soon")}>
               <FolderPlus className="w-4 h-4" />
               New folder
             </Button>
