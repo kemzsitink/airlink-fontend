@@ -58,7 +58,7 @@ export default function ServerConsolePage({
 
   // Connect Socket.IO to console namespace
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+    const apiUrl = process.env.NEXT_PUBLIC_WS_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
     const socket = io(`${apiUrl}/console`, {
       query: { uuid },
       withCredentials: true,
