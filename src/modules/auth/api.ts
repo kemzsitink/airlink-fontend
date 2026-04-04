@@ -12,7 +12,7 @@ export const authApi = {
     apiRequest<void>('/auth/logout', { method: 'POST' }),
 
   me: () =>
-    apiRequest<User>('/auth/me'),
+    apiRequest<{ user: User }>('/auth/me').then((r) => r.user),
 
   loginHistory: () =>
     apiRequest<LoginHistory[]>('/users/me/login-history'),

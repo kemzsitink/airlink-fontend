@@ -2,13 +2,15 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  description?: string;
-  avatar?: string;
+  description?: string | null;
+  avatar?: string | null;
   isAdmin: boolean;
   serverLimit: number;
   maxMemory: number;
   maxCpu: number;
   maxStorage: number;
+  canCreateServer: boolean;
+  allowUserDeleteServer: boolean;
   lang?: string;
 }
 

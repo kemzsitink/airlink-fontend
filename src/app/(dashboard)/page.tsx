@@ -9,12 +9,16 @@ import { ServerCard } from "@/components/server/ServerCard";
 import { ServerListRow } from "@/components/server/ServerListRow";
 import { Button } from "@/components/ui/button";
 import { useServers } from "@/modules/servers/hooks";
+import { useCurrentUser } from "@/modules/auth/hooks";
 import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const { data: servers = [] } = useServers();
+  const { data: user } = useCurrentUser();
   const [view, setView] = useState<"grid" | "list">("grid");
-  const canCreateServer = true;
+
+  // Admin can always create; regular users need allowUserCreateServer + serverLimit > 0
+  const canCreateServer = user?.isAdmin || (user?.canCreateServer ?? false);
 
   return (
     <>

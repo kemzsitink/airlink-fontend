@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -12,11 +12,11 @@ import { useNodes } from "@/modules/nodes/hooks";
 import { useImages } from "@/modules/images/hooks";
 import { serversApi } from "@/modules/servers/api";
 import { useServers } from "@/modules/servers/hooks";
-
-const resourceLimits = { maxMemory: 4096, maxCpu: 400, maxStorage: 50 };
+import { useCurrentUser } from "@/modules/auth/hooks";
 
 export default function CreateServerPage() {
   const router = useRouter();
+  const { data: user } = useCurrentUser();
   const { data: nodes = [] } = useNodes();
   const { data: images = [] } = useImages();
   const { data: servers = [] } = useServers();
@@ -33,10 +33,21 @@ export default function CreateServerPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Redirect if user doesn't have permission
+  useEffect(() => {
+    if (!user) return;
+    const canCreate = user.isAdmin || user.canCreateServer;
+    if (!canCreate) router.replace("/");
+  }, [user, router]);
+
+  // Resource limits from user (fallback to safe defaults)
+  const maxMemory = user?.maxMemory ?? 512;
+  const maxCpu = user?.maxCpu ?? 100;
+  const maxStorage = user?.maxStorage ?? 5;
+  const serverLimit = user?.serverLimit ?? 0;
+
   const selectedImage = images.find((i) => String(i.id) === imageId);
-  const dockerVariants = selectedImage
-    ? selectedImage.dockerImages.map((d) => Object.keys(d)[0])
-    : [];
+  const dockerVariants = selectedImage ? selectedImage.dockerImages.map((d) => Object.keys(d)[0]) : [];
 
   function step(setter: (v: number) => void, current: number, delta: number, min: number, max: number) {
     setter(Math.max(min, Math.min(max, current + delta)));
@@ -48,6 +59,11 @@ export default function CreateServerPage() {
     if (!nodeId) { setError("Please select a node"); return; }
     if (!imageId) { setError("Please select an image"); return; }
     if (!dockerImage) { setError("Please select a Docker variant"); return; }
+
+    if (!user?.isAdmin && serverLimit > 0 && servers.length >= serverLimit) {
+      setError(`You have reached your server limit of ${serverLimit}`);
+      return;
+    }
 
     setError("");
     setLoading(true);
@@ -73,19 +89,23 @@ export default function CreateServerPage() {
     }
   }
 
+  if (!user) return null;
+  if (!user.isAdmin && !user.canCreateServer) return null;
+
   return (
     <div className="px-8 lg:px-12 pt-6 pb-12 max-w-5xl">
       <div className="flex items-center justify-between mb-7">
         <div>
           <h1 className="text-base font-semibold text-neutral-900 dark:text-white">Create a server</h1>
-          <p className="text-sm text-neutral-500 mt-0.5">{servers.length} server{servers.length !== 1 ? "s" : ""} used</p>
+          <p className="text-sm text-neutral-500 mt-0.5">
+            {servers.length}{serverLimit > 0 ? ` / ${serverLimit}` : ""} server{servers.length !== 1 ? "s" : ""} used
+          </p>
         </div>
         <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-300 transition">Cancel</Link>
       </div>
 
       <div className="space-y-5">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {/* Details */}
           <div className="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5">
             <div className="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
               <p className="text-sm font-medium text-neutral-800 dark:text-white">Details</p>
@@ -102,7 +122,6 @@ export default function CreateServerPage() {
             </div>
           </div>
 
-          {/* Node & Image */}
           <div className="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5">
             <div className="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
               <p className="text-sm font-medium text-neutral-800 dark:text-white">Node & image</p>
@@ -147,16 +166,15 @@ export default function CreateServerPage() {
           </div>
         </div>
 
-        {/* Resources */}
         <div className="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
           <div className="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
             <p className="text-sm font-medium text-neutral-800 dark:text-white">Resources</p>
           </div>
           <div className="p-5 grid grid-cols-3 gap-4">
             {[
-              { label: "RAM (MB)", value: memory, setter: setMemory, stepVal: 128, min: 128, max: resourceLimits.maxMemory, hint: `Max ${resourceLimits.maxMemory} MB` },
-              { label: "CPU (%)", value: cpu, setter: setCpu, stepVal: 50, min: 50, max: resourceLimits.maxCpu, hint: "50% = half a core" },
-              { label: "Storage (GB)", value: storage, setter: setStorage, stepVal: 1, min: 1, max: resourceLimits.maxStorage, hint: `Max ${resourceLimits.maxStorage} GB` },
+              { label: "RAM (MB)", value: memory, setter: setMemory, stepVal: 128, min: 128, max: maxMemory, hint: `Max ${maxMemory} MB` },
+              { label: "CPU (%)", value: cpu, setter: setCpu, stepVal: 50, min: 50, max: maxCpu, hint: "50% = half a core" },
+              { label: "Storage (GB)", value: storage, setter: setStorage, stepVal: 1, min: 1, max: maxStorage, hint: `Max ${maxStorage} GB` },
             ].map((r) => (
               <div key={r.label} className="space-y-1.5">
                 <Label>{r.label}</Label>
