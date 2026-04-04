@@ -1,12 +1,15 @@
 "use client";
 
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { Upload, Coins } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCurrentUser, useLoginHistory } from "@/modules/auth/hooks";
+import { authApi } from "@/modules/auth/api";
 import type { LoginHistory } from "@/modules/auth/types";
 
 const languages = ["en", "fr", "de", "es", "pt", "it", "ru", "zh", "ja", "ta"];
@@ -15,8 +18,67 @@ const langLabels: Record<string, string> = { en: "English", fr: "Français", de:
 export default function AccountPage() {
   const { data: user } = useCurrentUser();
   const { data: loginHistory = [] } = useLoginHistory();
+
+  const usernameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const currentPasswordRef = useRef<HTMLInputElement>(null);
+  const newPasswordRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const [lang, setLang] = useState(user?.lang ?? "en");
+
   if (!user) return <p className="text-sm text-neutral-500 p-4">Loading...</p>;
   const avatarUrl = user.avatar || `https://api.dicebear.com/9.x/thumbs/svg?seed=${user.username}`;
+
+  async function handleSaveUsername() {
+    const value = usernameRef.current?.value?.trim();
+    if (!value) return;
+    try {
+      await authApi.updateUsername(value);
+      toast.success("Username updated");
+    } catch {
+      toast.error("Failed to update username");
+    }
+  }
+
+  async function handleSaveEmail() {
+    const value = emailRef.current?.value?.trim();
+    if (!value) return;
+    try {
+      await authApi.updateEmail(value);
+      toast.success("Email updated");
+    } catch {
+      toast.error("Failed to update email");
+    }
+  }
+
+  async function handleUpdatePassword() {
+    const current = currentPasswordRef.current?.value;
+    const next = newPasswordRef.current?.value;
+    if (!current || !next) { toast.error("Fill in both password fields"); return; }
+    try {
+      await authApi.updatePassword(current, next);
+      toast.success("Password updated");
+      if (currentPasswordRef.current) currentPasswordRef.current.value = "";
+      if (newPasswordRef.current) newPasswordRef.current.value = "";
+    } catch {
+      toast.error("Failed to update password");
+    }
+  }
+
+  async function handleSaveDescription() {
+    const value = descriptionRef.current?.value ?? "";
+    try {
+      await authApi.updateDescription(value);
+      toast.success("Description updated");
+    } catch {
+      toast.error("Failed to update description");
+    }
+  }
+
+  function handleSaveLanguage() {
+    document.cookie = `lang=${lang}; path=/; max-age=31536000`;
+    toast.success("Language saved");
+  }
 
   return (
     <>
@@ -43,33 +105,33 @@ export default function AccountPage() {
             <div>
               <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Username</label>
               <div className="flex gap-1.5">
-                <Input defaultValue={user.username} className="h-7 text-xs" />
-                <Button className="shrink-0 text-xs h-7">Save</Button>
+                <Input ref={usernameRef} defaultValue={user.username} className="h-7 text-xs" />
+                <Button className="shrink-0 text-xs h-7" onClick={handleSaveUsername}>Save</Button>
               </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Email</label>
               <div className="flex gap-1.5">
-                <Input type="email" defaultValue={user.email} className="h-7 text-xs" />
-                <Button className="shrink-0 text-xs h-7">Save</Button>
+                <Input ref={emailRef} type="email" defaultValue={user.email} className="h-7 text-xs" />
+                <Button className="shrink-0 text-xs h-7" onClick={handleSaveEmail}>Save</Button>
               </div>
             </div>
             <div className="col-span-2">
               <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Change password</label>
               <div className="grid grid-cols-2 gap-1.5">
-                <Input type="password" placeholder="Current password" className="h-7 text-xs" />
-                <Input type="password" placeholder="New password" className="h-7 text-xs" />
+                <Input ref={currentPasswordRef} type="password" placeholder="Current password" className="h-7 text-xs" />
+                <Input ref={newPasswordRef} type="password" placeholder="New password" className="h-7 text-xs" />
               </div>
-              <Button className="mt-2 text-xs h-7">Update password</Button>
+              <Button className="mt-2 text-xs h-7" onClick={handleUpdatePassword}>Update password</Button>
             </div>
             <div className="col-span-2">
               <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Description</label>
-              <Textarea rows={2} defaultValue={user.description ?? ""} className="text-xs resize-none" />
-              <Button className="mt-1.5 text-xs h-7">Save</Button>
+              <Textarea ref={descriptionRef} rows={2} defaultValue={user.description ?? ""} className="text-xs resize-none" />
+              <Button className="mt-1.5 text-xs h-7" onClick={handleSaveDescription}>Save</Button>
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">Language</label>
-              <Select defaultValue={user.lang ?? "en"}>
+              <Select value={lang} onValueChange={setLang}>
                 <SelectTrigger className="h-7 text-xs mb-1.5">
                   <SelectValue />
                 </SelectTrigger>
@@ -79,7 +141,7 @@ export default function AccountPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Button className="text-xs h-7">Save</Button>
+              <Button className="text-xs h-7" onClick={handleSaveLanguage}>Save</Button>
             </div>
           </div>
         </div>
@@ -111,4 +173,3 @@ export default function AccountPage() {
     </>
   );
 }
-

@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Check, X } from "lucide-react";
+import { toast } from "sonner";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useCreateUser } from "@/modules/users/hooks";
 import { cn } from "@/lib/utils";
 
 function Crit({ ok, label }: { ok: boolean | null; label: string }) {
@@ -20,6 +23,9 @@ function Crit({ ok, label }: { ok: boolean | null; label: string }) {
 }
 
 export default function AdminCreateUserPage() {
+  const router = useRouter();
+  const createUser = useCreateUser();
+  const emailRef = useRef<HTMLInputElement>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -29,6 +35,24 @@ export default function AdminCreateUserPage() {
   const pLen = password.length >= 8;
   const pLetter = /[A-Za-z]/.test(password);
   const pNum = /\d/.test(password);
+
+  function handleCreate() {
+    const email = emailRef.current?.value?.trim();
+    if (!email || !username || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    createUser.mutate(
+      { email, username, password, isAdmin },
+      {
+        onSuccess: () => {
+          toast.success("User created");
+          router.push("/admin/users");
+        },
+        onError: () => toast.error("Failed to create user"),
+      }
+    );
+  }
 
   return (
     <>
@@ -43,7 +67,7 @@ export default function AdminCreateUserPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div className="space-y-1.5">
             <Label>Email</Label>
-            <Input type="email" placeholder="example@domain.com" />
+            <Input ref={emailRef} type="email" placeholder="example@domain.com" />
           </div>
 
           <div className="space-y-1.5">
@@ -78,7 +102,9 @@ export default function AdminCreateUserPage() {
           </div>
 
           <div className="sm:col-span-2 flex justify-end">
-            <Button>Create User</Button>
+            <Button onClick={handleCreate} disabled={createUser.isPending}>
+              {createUser.isPending ? "Creating…" : "Create User"}
+            </Button>
           </div>
         </div>
       </div>

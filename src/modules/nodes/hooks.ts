@@ -38,3 +38,14 @@ export function useDeleteNode() {
     onSuccess: () => qc.invalidateQueries({ queryKey: nodeKeys.list() }),
   });
 }
+
+export function useUpdateNode(id: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: Partial<CreateNodePayload>) => nodesApi.update(id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: nodeKeys.list() });
+      qc.invalidateQueries({ queryKey: nodeKeys.detail(id) });
+    },
+  });
+}

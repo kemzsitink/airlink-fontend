@@ -2,9 +2,13 @@
 
 import { useState, use } from "react";
 import { Folder, FileText, FileCog, Image, Plus, Upload, Trash2, Pencil, Download } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useFiles } from "@/modules/servers/hooks";
+import { serversApi } from "@/modules/servers/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { serverKeys } from "@/modules/servers/hooks";
 import type { FileEntry } from "@/modules/servers/types";
 
 function formatSize(bytes: number) {
@@ -26,6 +30,8 @@ export default function ServerFilesPage({ params }: { params: Promise<{ uuid: st
   const { uuid } = use(params);
   const { data: files = [] } = useFiles(uuid);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
+  const qc = useQueryClient();
 
   function toggle(name: string) {
     setSelected((prev) => {
@@ -33,6 +39,31 @@ export default function ServerFilesPage({ params }: { params: Promise<{ uuid: st
       next.has(name) ? next.delete(name) : next.add(name);
       return next;
     });
+  }
+
+  async function handleDeleteSingle(name: string) {
+    try {
+      await serversApi.deleteFile(uuid, name);
+      qc.invalidateQueries({ queryKey: serverKeys.files(uuid) });
+      toast.success(`Deleted ${name}`);
+    } catch {
+      toast.error(`Failed to delete ${name}`);
+    }
+  }
+
+  async function handleBulkDelete() {
+    if (selected.size === 0) return;
+    setDeleting(true);
+    try {
+      await Promise.all([...selected].map((name) => serversApi.deleteFile(uuid, name)));
+      qc.invalidateQueries({ queryKey: serverKeys.files(uuid) });
+      setSelected(new Set());
+      toast.success(`Deleted ${selected.size} file(s)`);
+    } catch {
+      toast.error("Failed to delete some files");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -76,7 +107,12 @@ export default function ServerFilesPage({ params }: { params: Promise<{ uuid: st
                     {file.type !== "directory" && (
                       <button className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"><Download className="w-3.5 h-3.5" /></button>
                     )}
-                    <button className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                    <button
+                      onClick={() => handleDeleteSingle(file.name)}
+                      className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -89,7 +125,9 @@ export default function ServerFilesPage({ params }: { params: Promise<{ uuid: st
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white dark:bg-neutral-900 shadow-xl border border-neutral-200 dark:border-neutral-700/60 z-40">
           <span className="text-sm font-medium text-neutral-600 dark:text-neutral-300">{selected.size} selected</span>
           <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-700" />
-          <Button variant="destructive" size="sm">Delete</Button>
+          <Button variant="destructive" size="sm" onClick={handleBulkDelete} disabled={deleting}>
+            {deleting ? "Deleting…" : "Delete"}
+          </Button>
         </div>
       )}
     </div>

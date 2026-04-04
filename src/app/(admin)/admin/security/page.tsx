@@ -2,17 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useSettings, useBannedIps } from "@/modules/settings/hooks";
+import { useSettings, useSaveRateLimit, useBannedIps } from "@/modules/settings/hooks";
 import type { PanelSettings } from "@/modules/settings/types";
 
 export default function AdminSecurityPage() {
   const { data } = useSettings();
   const { bannedIps, ban, unban } = useBannedIps();
+  const saveRateLimit = useSaveRateLimit();
   const [rateLimitEnabled, setRateLimitEnabled] = useState(false);
   const [rpm, setRpm] = useState(100);
   const [newIp, setNewIp] = useState("");
@@ -23,6 +25,16 @@ export default function AdminSecurityPage() {
       setRpm((data as PanelSettings).rateLimitRpm ?? 100);
     }
   }, [data]);
+
+  function handleSaveRateLimit() {
+    saveRateLimit.mutate(
+      { rateLimitEnabled, rateLimitRpm: rpm },
+      {
+        onSuccess: () => toast.success("Rate limit settings saved"),
+        onError: () => toast.error("Failed to save rate limit settings"),
+      }
+    );
+  }
 
   return (
     <>
@@ -46,7 +58,9 @@ export default function AdminSecurityPage() {
                 <Label>Requests per minute</Label>
                 <Input type="number" value={rpm} onChange={(e) => setRpm(Number(e.target.value))} className="w-40" />
               </div>
-              <Button size="sm">Save</Button>
+              <Button size="sm" onClick={handleSaveRateLimit} disabled={saveRateLimit.isPending}>
+                {saveRateLimit.isPending ? "Saving…" : "Save"}
+              </Button>
             </div>
         </div>
 

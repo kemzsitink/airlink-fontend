@@ -3,10 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { RefreshCw, Trash2, Store } from "lucide-react";
+import { toast } from "sonner";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAddons, useToggleAddon, useUninstallAddon } from "@/modules/addons/hooks";
+import { addonsApi } from "@/modules/addons/api";
 import { cn } from "@/lib/utils";
 
 export default function AdminAddonsPage() {
@@ -14,16 +16,36 @@ export default function AdminAddonsPage() {
   const toggleMutation = useToggleAddon();
   const uninstallMutation = useUninstallAddon();
   const [filter, setFilter] = useState("");
+  const [reloading, setReloading] = useState(false);
+
   const filtered = addons.filter((a: { name: string; description?: string; author?: string }) =>
     `${a.name} ${a.description ?? ""} ${a.author ?? ""}`.toLowerCase().includes(filter.toLowerCase())
   );
+
+  async function handleReload() {
+    setReloading(true);
+    try {
+      await addonsApi.reload();
+      await refetch();
+      toast.success("Addons reloaded");
+    } catch {
+      toast.error("Failed to reload addons");
+    } finally {
+      setReloading(false);
+    }
+  }
 
   return (
     <>
       <PageTitle
         title="Addons"
         description="Manage installed addons and browse the store"
-        actions={<Button variant="outline" size="sm"><RefreshCw className="w-4 h-4" />Reload</Button>}
+        actions={
+          <Button variant="outline" size="sm" onClick={handleReload} disabled={reloading}>
+            <RefreshCw className={cn("w-4 h-4", reloading && "animate-spin")} />
+            {reloading ? "Reloading…" : "Reload"}
+          </Button>
+        }
       />
 
       <div className="flex border-b border-neutral-200 dark:border-neutral-800 mb-5">

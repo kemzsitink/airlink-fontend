@@ -2,12 +2,29 @@
 
 import { use } from "react";
 import { Plus, Download, Trash2, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useBackups } from "@/modules/servers/hooks";
+import { useBackups, useCreateBackup, useDeleteBackup } from "@/modules/servers/hooks";
 
 export default function ServerBackupsPage({ params }: { params: Promise<{ uuid: string }> }) {
   const { uuid } = use(params);
   const { data: backups = [] } = useBackups(uuid);
+  const createBackup = useCreateBackup(uuid);
+  const deleteBackup = useDeleteBackup(uuid);
+
+  function handleCreate() {
+    createBackup.mutate(undefined, {
+      onSuccess: () => toast.success("Backup created"),
+      onError: () => toast.error("Failed to create backup"),
+    });
+  }
+
+  function handleDelete(id: number) {
+    deleteBackup.mutate(id, {
+      onSuccess: () => toast.success("Backup deleted"),
+      onError: () => toast.error("Failed to delete backup"),
+    });
+  }
 
   return (
     <div>
@@ -16,7 +33,9 @@ export default function ServerBackupsPage({ params }: { params: Promise<{ uuid: 
           <h2 className="text-sm font-medium text-neutral-800 dark:text-white">Backups</h2>
           <p className="text-xs text-neutral-500 mt-0.5">{backups.length} backup{backups.length !== 1 ? "s" : ""} stored</p>
         </div>
-        <Button size="sm"><Plus className="w-4 h-4" />Create Backup</Button>
+        <Button size="sm" onClick={handleCreate} disabled={createBackup.isPending}>
+          <Plus className="w-4 h-4" />{createBackup.isPending ? "Creating…" : "Create Backup"}
+        </Button>
       </div>
 
       {backups.length === 0 ? (
@@ -34,7 +53,12 @@ export default function ServerBackupsPage({ params }: { params: Promise<{ uuid: 
               <div className="flex items-center gap-2">
                 <button className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"><RotateCcw className="w-4 h-4" /></button>
                 <button className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"><Download className="w-4 h-4" /></button>
-                <button className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                <button
+                  onClick={() => handleDelete(backup.id)}
+                  className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             </div>
           ))}

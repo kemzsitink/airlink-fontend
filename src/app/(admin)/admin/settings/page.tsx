@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useSettings } from "@/modules/settings/hooks";
+import { useSettings, useSaveServerPolicy } from "@/modules/settings/hooks";
+import { settingsApi } from "@/modules/settings/api";
 import type { PanelSettings } from "@/modules/settings/types";
 import { cn } from "@/lib/utils";
 
@@ -14,12 +16,50 @@ type Tab = "appearance" | "servers" | "security";
 
 export default function AdminSettingsPage() {
   const { data } = useSettings();
+  const saveServerPolicy = useSaveServerPolicy();
   const [form, setForm] = useState<PanelSettings>({} as PanelSettings);
   const [tab, setTab] = useState<Tab>("appearance");
+  const vtKeyRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { if (data) setForm(data); }, [data]);
 
   const set = (patch: Partial<PanelSettings>) => setForm((s) => ({ ...s, ...patch }));
+
+  async function handleSaveAppearance() {
+    try {
+      await settingsApi.saveAppearance({ title: form.title, allowRegistration: form.allowRegistration });
+      toast.success("Appearance saved");
+    } catch {
+      toast.error("Failed to save appearance");
+    }
+  }
+
+  function handleSaveServerPolicy() {
+    saveServerPolicy.mutate(
+      {
+        allowUserCreateServer: form.allowUserCreateServer,
+        allowUserDeleteServer: form.allowUserDeleteServer,
+        defaultServerLimit: form.defaultServerLimit,
+        defaultMaxMemory: form.defaultMaxMemory,
+        defaultMaxCpu: form.defaultMaxCpu,
+        defaultMaxStorage: form.defaultMaxStorage,
+      },
+      {
+        onSuccess: () => toast.success("Server policy saved"),
+        onError: () => toast.error("Failed to save server policy"),
+      }
+    );
+  }
+
+  async function handleSaveVtKey() {
+    const key = vtKeyRef.current?.value ?? "";
+    try {
+      await settingsApi.saveVtKey(key);
+      toast.success("VirusTotal key saved");
+    } catch {
+      toast.error("Failed to save VirusTotal key");
+    }
+  }
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "appearance", label: "Appearance" },
@@ -48,7 +88,7 @@ export default function AdminSettingsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 px-5 py-5">
               <div className="space-y-1.5">
                 <Label>Site title</Label>
-                <Input value={form.title} onChange={(e) => set({ title: e.target.value })} />
+                <Input value={form.title ?? ""} onChange={(e) => set({ title: e.target.value })} />
               </div>
               <div className="space-y-1.5">
                 <Label>Logo</Label>
@@ -68,11 +108,13 @@ export default function AdminSettingsPage() {
                 <p className="text-sm font-medium text-neutral-700 dark:text-white">Allow public registration</p>
                 <p className="text-xs text-neutral-500 mt-0.5">When off, only admins can create new accounts.</p>
               </div>
-              <Switch checked={form.allowRegistration} onCheckedChange={(v) => set({ allowRegistration: v })} />
+              <Switch checked={form.allowRegistration ?? false} onCheckedChange={(v) => set({ allowRegistration: v })} />
             </div>
           </div>
 
-          <div className="flex justify-end"><Button>Save appearance</Button></div>
+          <div className="flex justify-end">
+            <Button onClick={handleSaveAppearance}>Save appearance</Button>
+          </div>
         </div>
       )}
 
@@ -109,13 +151,15 @@ export default function AdminSettingsPage() {
                   <Label>
                     {f.label} {f.unit && <span className="text-neutral-400 font-normal">({f.unit})</span>}
                   </Label>
-                  <Input type="number" value={form[f.key] as number}
+                  <Input type="number" value={(form[f.key] as number) ?? 0}
                     onChange={(e) => set({ [f.key]: Number(e.target.value) })} />
                 </div>
               ))}
             </div>
             <div className="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <Button>Save</Button>
+              <Button onClick={handleSaveServerPolicy} disabled={saveServerPolicy.isPending}>
+                {saveServerPolicy.isPending ? "Saving…" : "Save"}
+              </Button>
             </div>
           </div>
         </div>
@@ -128,12 +172,12 @@ export default function AdminSettingsPage() {
             <div className="px-5 py-5">
               <div className="space-y-1.5">
                 <Label>API key</Label>
-                <Input type="password" defaultValue={form.virusTotalApiKey ?? ""} placeholder="Paste your key" className="max-w-sm font-mono" />
+                <Input ref={vtKeyRef} type="password" defaultValue={form.virusTotalApiKey ?? ""} placeholder="Paste your key" className="max-w-sm font-mono" />
                 <p className="text-xs text-neutral-500">Get a free key at <a href="https://www.virustotal.com" target="_blank" className="underline">virustotal.com</a>.</p>
               </div>
             </div>
             <div className="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <Button>Save</Button>
+              <Button onClick={handleSaveVtKey}>Save</Button>
             </div>
           </div>
         </div>
