@@ -5,6 +5,7 @@ import { Plus, Download, Trash2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useBackups, useCreateBackup, useDeleteBackup } from "@/modules/servers/hooks";
+import { serversApi } from "@/modules/servers/api";
 
 export default function ServerBackupsPage({ params }: { params: Promise<{ uuid: string }> }) {
   const { uuid } = use(params);
@@ -15,7 +16,7 @@ export default function ServerBackupsPage({ params }: { params: Promise<{ uuid: 
   function handleCreate() {
     createBackup.mutate(undefined, {
       onSuccess: () => toast.success("Backup created"),
-      onError: () => toast.error("Failed to create backup"),
+      onError: (e) => toast.error(e instanceof Error ? e.message : "Failed to create backup"),
     });
   }
 
@@ -24,6 +25,10 @@ export default function ServerBackupsPage({ params }: { params: Promise<{ uuid: 
       onSuccess: () => toast.success("Backup deleted"),
       onError: () => toast.error("Failed to delete backup"),
     });
+  }
+
+  function handleDownload(id: number) {
+    window.open(serversApi.downloadBackupUrl(uuid, id), "_blank");
   }
 
   return (
@@ -48,13 +53,29 @@ export default function ServerBackupsPage({ params }: { params: Promise<{ uuid: 
             <div key={backup.id} className="flex items-center justify-between bg-white dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 px-4 py-3">
               <div>
                 <p className="text-sm font-medium text-neutral-800 dark:text-white">{backup.name}</p>
-                <p className="text-xs text-neutral-500 mt-0.5">{backup.size} · {new Date(backup.createdAt).toLocaleString()}</p>
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  {backup.size ? `${(Number(backup.size) / 1024 / 1024).toFixed(1)} MB · ` : ""}
+                  {new Date(backup.createdAt).toLocaleString()}
+                </p>
               </div>
               <div className="flex items-center gap-2">
-                <button className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"><RotateCcw className="w-4 h-4" /></button>
-                <button className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"><Download className="w-4 h-4" /></button>
+                <button
+                  onClick={() => toast.info("Restore not yet implemented")}
+                  title="Restore"
+                  className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleDownload(backup.id)}
+                  title="Download"
+                  className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                </button>
                 <button
                   onClick={() => handleDelete(backup.id)}
+                  title="Delete"
                   className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />

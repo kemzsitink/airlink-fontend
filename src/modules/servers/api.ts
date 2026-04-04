@@ -31,6 +31,9 @@ export const serversApi = {
   deleteBackup: (uuid: string, backupId: number) =>
     apiRequest<void>(`/servers/${uuid}/backups/${backupId}`, { method: 'DELETE' }),
 
+  downloadBackupUrl: (uuid: string, backupId: number) =>
+    `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'}/servers/${uuid}/backups/${backupId}/download`,
+
   // Startup
   getStartup: (uuid: string) =>
     apiRequest<{ command: string; variables: StartupVariable[] }>(`/servers/${uuid}/startup`),
