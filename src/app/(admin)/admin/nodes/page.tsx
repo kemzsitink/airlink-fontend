@@ -3,16 +3,32 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
-import { useNodes } from "@/modules/nodes/hooks";
+import { useNodes, useDeleteNode } from "@/modules/nodes/hooks";
 import { cn } from "@/lib/utils";
 
 export default function AdminNodesPage() {
   const router = useRouter();
   const { data: nodes = [] } = useNodes();
+  const deleteNode = useDeleteNode();
   const online = nodes.filter((n) => n.status === "Online").length;
   const totalInstances = nodes.reduce((t, n) => t + n.instances.length, 0);
+
+  function handleDelete(id: number, name: string, instanceCount: number) {
+    const msg = instanceCount > 0
+      ? `Node "${name}" has ${instanceCount} server(s). Delete node and all its servers?`
+      : `Delete node "${name}"?`;
+    if (!confirm(msg)) return;
+    deleteNode.mutate(
+      { id, deleteInstances: instanceCount > 0 },
+      {
+        onSuccess: () => toast.success("Node deleted"),
+        onError: (e) => toast.error(e instanceof Error ? e.message : "Failed to delete node"),
+      }
+    );
+  }
 
   return (
     <>
@@ -79,7 +95,15 @@ export default function AdminNodesPage() {
                 <td className="whitespace-nowrap px-3 py-4 text-sm" onClick={(e) => e.stopPropagation()}>
                   <div className="flex gap-2">
                     <Link href={`/admin/nodes/${node.id}`}><Button variant="outline" size="sm">Edit</Button></Link>
-                    <Button variant="destructive" size="icon" className="h-8 w-8"><Trash2 className="w-4 h-4" /></Button>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => { e.stopPropagation(); handleDelete(node.id, node.name, node.instances.length); }}
+                      disabled={deleteNode.isPending}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </td>
               </tr>

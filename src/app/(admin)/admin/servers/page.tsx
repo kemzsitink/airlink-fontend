@@ -2,13 +2,29 @@
 
 import Link from "next/link";
 import { Plus, ExternalLink, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
 import { useServers } from "@/modules/servers/hooks";
+import { serversApi } from "@/modules/servers/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { serverKeys } from "@/modules/servers/hooks";
 import { cn } from "@/lib/utils";
 
 export default function AdminServersPage() {
   const { data: servers = [] } = useServers();
+  const qc = useQueryClient();
+
+  async function handleDelete(id: number, name: string) {
+    if (!confirm(`Delete server "${name}"? This cannot be undone.`)) return;
+    try {
+      await serversApi.adminDelete(id);
+      qc.invalidateQueries({ queryKey: serverKeys.list() });
+      toast.success("Server deleted");
+    } catch {
+      toast.error("Failed to delete server");
+    }
+  }
 
   return (
     <>
@@ -35,7 +51,11 @@ export default function AdminServersPage() {
           </thead>
           <tbody className="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
             {servers.map((server) => {
-              const port = JSON.parse(server.Ports).find((p: { primary: boolean }) => p.primary)?.Port.split(":")[1];
+              let port = "—";
+              try {
+                const ports = JSON.parse(server.Ports ?? "[]");
+                port = ports.find((p: { primary: boolean }) => p.primary)?.Port?.split(":")[1] ?? ports[0]?.Port?.split(":")[1] ?? "—";
+              } catch { /* ignore */ }
               return (
                 <tr key={server.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.03] transition-colors">
                   <td className="py-4 px-4 text-sm">
@@ -74,7 +94,9 @@ export default function AdminServersPage() {
                       <Link href={`/admin/servers/edit/${server.id}`} className="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
                         <Pencil className="w-4 h-4" />
                       </Link>
-                      <button className="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:border-red-200 dark:hover:border-red-500/30 transition-colors">
+                      <button
+                        onClick={() => handleDelete(server.id, server.name)}
+                        className="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:border-red-200 dark:hover:border-red-500/30 transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>

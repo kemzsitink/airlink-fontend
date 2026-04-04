@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { useApiKeys, useCreateApiKey, useDeleteApiKey } from "@/modules/apikeys/hooks";
+import { useApiKeys, useCreateApiKey, useDeleteApiKey, useToggleApiKey } from "@/modules/apikeys/hooks";
 import { cn } from "@/lib/utils";
 
 const PERMISSIONS = ["servers:read", "servers:write", "users:read", "users:write", "nodes:read", "nodes:write"];
@@ -18,6 +18,7 @@ export default function AdminApiKeysPage() {
   const { data: keys = [] } = useApiKeys();
   const createApiKey = useCreateApiKey();
   const deleteApiKey = useDeleteApiKey();
+  const toggleApiKey = useToggleApiKey();
   const [copied, setCopied] = useState<number | null>(null);
 
   // Create dialog state
@@ -179,7 +180,13 @@ export default function AdminApiKeysPage() {
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-500">{new Date(key.createdAt).toLocaleDateString()}</td>
                   <td className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm">
                     <div className="flex gap-2 justify-end">
-                      <button className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 transition"><Pencil className="w-5 h-5" /></button>
+                      <button
+                        onClick={() => toggleApiKey.mutate(key.id, { onError: () => toast.error("Failed to toggle key") })}
+                        className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 transition"
+                        title={key.active ? "Deactivate" : "Activate"}
+                      >
+                        <Pencil className="w-5 h-5" />
+                      </button>
                       <button
                         onClick={() => handleDelete(key.id)}
                         className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition"

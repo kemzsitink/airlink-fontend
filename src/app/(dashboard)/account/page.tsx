@@ -88,7 +88,25 @@ export default function AccountPage() {
           <label htmlFor="avatar-input" className="absolute -bottom-1.5 -right-1.5 w-6 h-6 flex items-center justify-center rounded-full bg-neutral-800 dark:bg-white border-2 border-white dark:border-neutral-900 cursor-pointer hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">
             <Upload className="w-3 h-3 text-white dark:text-neutral-900" />
           </label>
-          <input id="avatar-input" type="file" accept="image/*" className="hidden" />
+          <input
+            id="avatar-input"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const form = new FormData();
+              form.append("avatar", file);
+              try {
+                await authApi.uploadAvatar(form);
+                toast.success("Avatar updated");
+              } catch {
+                toast.error("Failed to upload avatar");
+              }
+              e.target.value = "";
+            }}
+          />
         </div>
         <div className="min-w-0 flex-1">
           <h1 className="text-base font-medium text-neutral-800 dark:text-white">Account</h1>

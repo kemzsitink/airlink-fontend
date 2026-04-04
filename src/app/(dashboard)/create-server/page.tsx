@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useNodes } from "@/modules/nodes/hooks";
 import { useImages } from "@/modules/images/hooks";
 import { serversApi } from "@/modules/servers/api";
+import { useServers } from "@/modules/servers/hooks";
 
 const resourceLimits = { maxMemory: 4096, maxCpu: 400, maxStorage: 50 };
 
@@ -18,6 +19,7 @@ export default function CreateServerPage() {
   const router = useRouter();
   const { data: nodes = [] } = useNodes();
   const { data: images = [] } = useImages();
+  const { data: servers = [] } = useServers();
 
   const nameRef = useRef<HTMLInputElement>(null);
   const descRef = useRef<HTMLInputElement>(null);
@@ -76,7 +78,7 @@ export default function CreateServerPage() {
       <div className="flex items-center justify-between mb-7">
         <div>
           <h1 className="text-base font-semibold text-neutral-900 dark:text-white">Create a server</h1>
-          <p className="text-sm text-neutral-500 mt-0.5">0 of 3 servers used</p>
+          <p className="text-sm text-neutral-500 mt-0.5">{servers.length} server{servers.length !== 1 ? "s" : ""} used</p>
         </div>
         <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-300 transition">Cancel</Link>
       </div>

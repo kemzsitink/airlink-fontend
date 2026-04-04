@@ -3,16 +3,25 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
-import { useUsers } from "@/modules/users/hooks";
+import { useUsers, useDeleteUser } from "@/modules/users/hooks";
 import { cn } from "@/lib/utils";
 
 export default function AdminUsersPage() {
   const router = useRouter();
   const { data: users = [] } = useUsers();
+  const deleteUser = useDeleteUser();
   const admins = users.filter((u) => u.isAdmin).length;
-  const online = users.filter((u) => u.online).length;
+
+  function handleDelete(id: number, username: string) {
+    if (!confirm(`Delete user "${username}"? This cannot be undone.`)) return;
+    deleteUser.mutate(id, {
+      onSuccess: () => toast.success("User deleted"),
+      onError: (e) => toast.error(e instanceof Error ? e.message : "Failed to delete user"),
+    });
+  }
 
   return (
     <>
@@ -30,7 +39,7 @@ export default function AdminUsersPage() {
         <div className="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">Total Users</h2>
           <p className="text-4xl font-normal text-neutral-800 dark:text-white">{users.length}</p>
-          <p className="text-sm text-neutral-400 mt-2">{online > 0 ? `${online} online` : "No users online"}</p>
+          <p className="text-sm text-neutral-400 mt-2">No users online</p>
         </div>
         <div className="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">Admins</h2>
@@ -76,7 +85,15 @@ export default function AdminUsersPage() {
                   <div className="flex gap-2">
                     <Link href={`/admin/users/view/${user.id}`}><Button variant="outline" size="sm">View</Button></Link>
                     <Link href={`/admin/users/edit/${user.id}`}><Button size="sm" className="bg-blue-600 hover:bg-blue-500 text-white border-none"><Pencil className="w-3 h-3" />Edit</Button></Link>
-                    <Button variant="destructive" size="icon" className="h-8 w-8"><Trash2 className="w-4 h-4" /></Button>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => { e.stopPropagation(); handleDelete(user.id, user.username); }}
+                      disabled={deleteUser.isPending}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </td>
               </tr>
