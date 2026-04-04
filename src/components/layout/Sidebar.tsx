@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutGrid,
@@ -15,6 +15,7 @@ import {
   LogOut,
   Box,
 } from "lucide-react";
+import { authApi } from "@/modules/auth/api";
 
 interface NavItem {
   label: string;
@@ -112,9 +113,18 @@ function NavLink({ item }: { item: NavItem }) {
 }
 
 export function Sidebar({ user, appName = "Airlink", logo }: SidebarProps) {
+  const router = useRouter();
   const avatarUrl = user.avatar
     ? user.avatar
     : `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(user.username)}`;
+
+  async function handleLogout() {
+    try {
+      await authApi.logout();
+    } catch { /* ignore */ }
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0">
@@ -186,13 +196,13 @@ export function Sidebar({ user, appName = "Airlink", logo }: SidebarProps) {
 
         {/* Logout */}
         <div className="shrink-0 border-t border-neutral-800/10 dark:border-white/5">
-          <Link
-            href="/logout"
-            className="group flex gap-x-3 pl-6 py-4 text-sm font-medium leading-6 text-neutral-500 hover:text-red-700 dark:hover:text-red-500/80 hover:bg-red-500/5 dark:hover:bg-neutral-700/10 transition-colors duration-300"
+          <button
+            onClick={handleLogout}
+            className="group flex gap-x-3 pl-6 py-4 w-full text-sm font-medium leading-6 text-neutral-500 hover:text-red-700 dark:hover:text-red-500/80 hover:bg-red-500/5 dark:hover:bg-neutral-700/10 transition-colors duration-300"
           >
             <LogOut className="w-5 h-5 mt-0.5 shrink-0" />
             <span>Logout</span>
-          </Link>
+          </button>
         </div>
       </div>
     </div>

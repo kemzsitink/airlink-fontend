@@ -1,15 +1,39 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { authApi } from "@/modules/auth/api";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const form = new FormData(e.currentTarget);
+    try {
+      await authApi.register({
+        username: form.get("username") as string,
+        email: form.get("email") as string,
+        password: form.get("password") as string,
+      });
+      router.push("/login");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="flex min-h-screen">
@@ -19,7 +43,13 @@ export default function RegisterPage() {
           <p className="text-sm text-neutral-500 mt-1">Join AirLink</p>
         </div>
 
-        <form method="POST" action="/api/auth/register" onSubmit={() => setLoading(true)} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3">
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          )}
+
           <div className="space-y-1.5">
             <Label htmlFor="username">Username</Label>
             <Input id="username" name="username" type="text" autoComplete="username" required placeholder="yourname" />

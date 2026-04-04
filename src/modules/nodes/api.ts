@@ -1,17 +1,17 @@
-import { apiRequest } from "../api-client";
-import type { Node, CreateNodePayload } from "./types";
+import { apiRequest } from '../api-client'
+import type { Node, CreateNodePayload } from './types'
 
 export const nodesApi = {
-  list: () => apiRequest<Node[]>("/admin/api/nodes"),
-  get: (id: number) => apiRequest<Node>(`/admin/node/${id}`),
+  list: () => apiRequest<Node[]>('/nodes'),
+  get: (id: number) => apiRequest<Node>(`/nodes/${id}`),
   create: (payload: CreateNodePayload) =>
-    apiRequest<void>("/admin/nodes/create", { method: "POST", body: payload }),
+    apiRequest<Node>('/nodes', { method: 'POST', body: payload }),
   update: (id: number, payload: Partial<CreateNodePayload>) =>
-    apiRequest<void>(`/admin/node/${id}`, { method: "POST", body: payload }),
+    apiRequest<Node>(`/nodes/${id}`, { method: 'PATCH', body: payload }),
   delete: (id: number, deleteInstances = false) =>
-    apiRequest<void>(`/admin/node/${id}${deleteInstances ? "?deleteInstance=true" : ""}`, { method: "DELETE" }),
+    apiRequest<void>(`/nodes/${id}${deleteInstances ? '?deleteInstances=true' : ''}`, { method: 'DELETE' }),
   configure: (id: number) =>
-    apiRequest<string>(`/admin/node/${id}/configure`),
+    apiRequest<{ command: string }>(`/nodes/${id}/configure`),
   stats: (id: number) =>
-    apiRequest<Node>(`/admin/node/${id}/stats`),
-};
+    apiRequest<unknown>(`/nodes/${id}/stats`),
+}

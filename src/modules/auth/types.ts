@@ -12,6 +12,9 @@ export interface User {
   lang?: string;
 }
 
+// SessionUser — subset returned by /auth/me
+export type SessionUser = Pick<User, 'id' | 'username' | 'email' | 'isAdmin' | 'description'>
+
 export interface LoginPayload {
   identifier: string;
   password: string;

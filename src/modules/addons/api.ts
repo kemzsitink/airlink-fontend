@@ -1,13 +1,13 @@
-import { apiRequest } from "../api-client";
-import type { Addon } from "./types";
-import type { ApiResponse } from "../types";
+import { apiRequest } from '../api-client'
+import type { Addon } from './types'
+import type { ApiResponse } from '../types'
 
 export const addonsApi = {
-  list: () => apiRequest<Addon[]>("/admin/api/addons"),
+  list: () => apiRequest<Addon[]>('/addons'),
   toggle: (slug: string, enabled: boolean) =>
-    apiRequest<ApiResponse>(`/admin/addons/toggle/${slug}`, { method: "POST", body: { enabled: String(enabled) } }),
+    apiRequest<ApiResponse>(`/addons/${slug}/toggle`, { method: 'POST', body: { enabled: String(enabled) } }),
   uninstall: (slug: string) =>
-    apiRequest<ApiResponse>("/admin/addons/store/uninstall", { method: "POST", body: { slug } }),
+    apiRequest<ApiResponse>(`/addons/${slug}`, { method: 'DELETE' }),
   reload: () =>
-    apiRequest<ApiResponse>("/admin/addons/reload", { method: "POST" }),
-};
+    apiRequest<ApiResponse>('/addons/reload', { method: 'POST' }),
+}

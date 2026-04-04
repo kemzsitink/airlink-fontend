@@ -1,17 +1,14 @@
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { MOCK_USER } from "@/modules/auth/types";
+import { redirect } from 'next/navigation'
+import { DashboardLayout } from '@/components/layout/DashboardLayout'
+import { getServerUser } from '@/lib/session'
 
-/**
- * User dashboard layout — server component.
- * Replace MOCK_USER with real session fetch (e.g. next-auth getServerSession)
- * and redirect unauthenticated users before rendering.
- */
-export default function DashboardRootLayout({ children }: { children: React.ReactNode }) {
-  const user = MOCK_USER; // TODO: replace with getServerSession()
+export default async function DashboardRootLayout({ children }: { children: React.ReactNode }) {
+  const user = await getServerUser()
+  if (!user) redirect('/login')
 
   return (
     <DashboardLayout user={user} appName="AirLink">
       {children}
     </DashboardLayout>
-  );
+  )
 }

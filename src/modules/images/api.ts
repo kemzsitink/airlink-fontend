@@ -1,21 +1,21 @@
-import { apiRequest } from "../api-client";
-import type { Image } from "./types";
+import { apiRequest } from '../api-client'
+import type { Image } from './types'
 
 export const imagesApi = {
-  list: () => apiRequest<Image[]>("/admin/api/images"),
-  get: (id: number) => apiRequest<Image>(`/admin/images/edit/${id}`),
+  list: () => apiRequest<Image[]>('/images'),
+  get: (id: number) => apiRequest<Image>(`/images/${id}`),
   create: (payload: Partial<Image>) =>
-    apiRequest<Image>("/admin/images/create", { method: "POST", body: payload }),
+    apiRequest<Image>('/images', { method: 'POST', body: payload }),
   update: (id: number, payload: Partial<Image>) =>
-    apiRequest<void>(`/admin/images/edit/${id}`, { method: "POST", body: payload }),
+    apiRequest<Image>(`/images/${id}`, { method: 'PATCH', body: payload }),
   delete: (id: number) =>
-    apiRequest<void>(`/admin/images/delete/${id}`, { method: "DELETE" }),
-  upload: (json: string) =>
-    apiRequest<void>("/admin/images/upload", { method: "POST", body: JSON.parse(json) }),
+    apiRequest<void>(`/images/${id}`, { method: 'DELETE' }),
+  upload: (json: unknown) =>
+    apiRequest<Image>('/images/import', { method: 'POST', body: json }),
   exportImage: (id: number) =>
-    apiRequest<Image>(`/admin/images/export/${id}`),
+    apiRequest<Image>(`/images/${id}`),
   storeInstall: (slug: string) =>
-    apiRequest<void>("/admin/images/store/install", { method: "POST", body: { slug } }),
-  storeUninstall: (slug: string) =>
-    apiRequest<void>("/admin/images/store/uninstall", { method: "POST", body: { slug } }),
-};
+    apiRequest<void>('/images/import', { method: 'POST', body: { slug } }),
+  storeUninstall: (id: number) =>
+    apiRequest<void>(`/images/${id}`, { method: 'DELETE' }),
+}
