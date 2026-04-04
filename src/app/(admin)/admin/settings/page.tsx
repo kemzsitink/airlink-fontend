@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useSettings } from "@/modules/settings/hooks";
-import { MOCK_SETTINGS } from "@/modules/settings/types";
 import type { PanelSettings } from "@/modules/settings/types";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +14,7 @@ type Tab = "appearance" | "servers" | "security";
 
 export default function AdminSettingsPage() {
   const { data } = useSettings();
-  const [form, setForm] = useState<PanelSettings>(MOCK_SETTINGS);
+  const [form, setForm] = useState<PanelSettings>({} as PanelSettings);
   const [tab, setTab] = useState<Tab>("appearance");
 
   useEffect(() => { if (data) setForm(data); }, [data]);

@@ -3,11 +3,11 @@
 import { RefreshCw, Users, Server, Activity, BarChart2 } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { usePlayerStats } from "@/modules/analytics/hooks";
-import { MOCK_PLAYER_STATS } from "@/modules/analytics/types";
 import { cn } from "@/lib/utils";
 
 export default function AdminPlayerStatsPage() {
-  const { data = MOCK_PLAYER_STATS, isFetching, refetch } = usePlayerStats();
+  const { data, isFetching, refetch } = usePlayerStats();
+  if (!data) return <p className="text-sm text-neutral-500 p-4">Loading...</p>;
   const utilization = data.totalMaxPlayers > 0
     ? Math.round((data.totalPlayers / data.totalMaxPlayers) * 100)
     : 0;
@@ -68,7 +68,7 @@ export default function AdminPlayerStatsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700/20 bg-white dark:bg-transparent">
-              {data.servers.map((s) => (
+              {data.servers.map((s: { serverId: string; serverName: string; online: boolean; playerCount: number; maxPlayers: number; version?: string }) => (
                 <tr key={s.serverId} className="hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <p className="text-sm font-medium text-neutral-800 dark:text-white">{s.serverName}</p>

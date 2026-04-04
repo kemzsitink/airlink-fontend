@@ -4,15 +4,18 @@ import { useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { useAnalytics } from "@/modules/analytics/hooks";
-import { MOCK_ANALYTICS } from "@/modules/analytics/types";
+import type { AnalyticsSummary } from "@/modules/analytics/types";
 import { cn } from "@/lib/utils";
 
 type Tab = "servers" | "nodes" | "activity";
 
 export default function AdminAnalyticsPage() {
-  const { data = MOCK_ANALYTICS, isFetching, refetch } = useAnalytics();
+  const { data, isFetching, refetch } = useAnalytics();
   const [tab, setTab] = useState<Tab>("servers");
-  const onlineNodes = data.nodes.filter((n) => n.online).length;
+
+  if (!data) return <p className="text-sm text-neutral-500 p-4">Loading analytics...</p>;
+
+  const onlineNodes = data.nodes.filter((n: { online: boolean }) => n.online).length;
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "servers", label: "Servers" },
@@ -78,7 +81,7 @@ export default function AdminAnalyticsPage() {
             ))}
           </div>
           <div className="space-y-3">
-            {data.nodes.map((node) => (
+            {data.nodes.map((node: { name: string; address: string; port: number; online: boolean; versionRelease?: string | null; serverCount: number; ram: number; cpu: number; disk: number }) => (
               <div key={node.name} className="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -122,8 +125,8 @@ export default function AdminAnalyticsPage() {
             {[
               { label: "Users", value: data.activity.totalUsers, sub: `${data.activity.adminCount} admins` },
               { label: "Images installed", value: data.activity.totalImages, sub: "in library" },
-              { label: "Logins (30d)", value: Object.values(data.activity.loginsByDay).reduce((a, b) => a + b, 0), sub: "panel sessions" },
-              { label: "Avg/day", value: Math.round(Object.values(data.activity.loginsByDay).reduce((a, b) => a + b, 0) / 30), sub: "logins per day" },
+              { label: "Logins (30d)", value: Object.values(data.activity.loginsByDay as Record<string, number>).reduce((a: number, b: number) => a + b, 0), sub: "panel sessions" },
+              { label: "Avg/day", value: Math.round(Object.values(data.activity.loginsByDay as Record<string, number>).reduce((a: number, b: number) => a + b, 0) / 30), sub: "logins per day" },
             ].map((s) => (
               <div key={s.label} className="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
                 <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">{s.label}</p>
@@ -145,7 +148,7 @@ export default function AdminAnalyticsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100 dark:divide-white/5">
-                {data.activity.recentLogins.map((l, i) => (
+                {data.activity.recentLogins.map((l: { userId: number; ipAddress: string; timestamp: string }, i: number) => (
                   <tr key={i} className="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition">
                     <td className="px-5 py-3 text-xs font-mono text-neutral-500">#{l.userId}</td>
                     <td className="px-5 py-3 text-xs font-mono text-neutral-600 dark:text-neutral-400">{l.ipAddress || "Unknown"}</td>

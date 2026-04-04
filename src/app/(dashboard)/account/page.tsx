@@ -6,14 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCurrentUser } from "@/modules/auth/hooks";
-import { MOCK_USER, MOCK_LOGIN_HISTORY } from "@/modules/auth/types";
+import { useCurrentUser, useLoginHistory } from "@/modules/auth/hooks";
+import type { LoginHistory } from "@/modules/auth/types";
 
 const languages = ["en", "fr", "de", "es", "pt", "it", "ru", "zh", "ja", "ta"];
 const langLabels: Record<string, string> = { en: "English", fr: "Français", de: "Deutsch", es: "Español", pt: "Português", it: "Italiano", ru: "Русский", zh: "中文", ja: "日本語", ta: "தமிழ்" };
 
 export default function AccountPage() {
-  const { data: user = MOCK_USER } = useCurrentUser();
+  const { data: user } = useCurrentUser();
+  const { data: loginHistory = [] } = useLoginHistory();
+  if (!user) return <p className="text-sm text-neutral-500 p-4">Loading...</p>;
   const avatarUrl = user.avatar || `https://api.dicebear.com/9.x/thumbs/svg?seed=${user.username}`;
 
   return (
@@ -94,7 +96,7 @@ export default function AccountPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100 dark:divide-white/5">
-                {MOCK_LOGIN_HISTORY.map((login, i) => (
+                {(loginHistory as LoginHistory[]).map((login, i) => (
                   <tr key={i} className="hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors">
                     <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300 whitespace-nowrap">{new Date(login.timestamp).toLocaleString()}</td>
                     <td className="px-4 py-3 text-neutral-500 dark:text-neutral-400 whitespace-nowrap font-mono text-xs">{login.ipAddress}</td>

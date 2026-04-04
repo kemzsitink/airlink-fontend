@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { addonsApi } from "./api";
-import { MOCK_ADDONS } from "./types";
 
 export const addonKeys = {
   all: ["addons"] as const,
@@ -10,11 +9,7 @@ export const addonKeys = {
 };
 
 export function useAddons() {
-  return useQuery({
-    queryKey: addonKeys.list(),
-    queryFn: addonsApi.list,
-    placeholderData: MOCK_ADDONS,
-  });
+  return useQuery({ queryKey: addonKeys.list(), queryFn: addonsApi.list });
 }
 
 export function useToggleAddon() {

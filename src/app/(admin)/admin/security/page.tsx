@@ -8,19 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useSettings, useBannedIps } from "@/modules/settings/hooks";
-import { MOCK_SETTINGS } from "@/modules/settings/types";
+import type { PanelSettings } from "@/modules/settings/types";
 
 export default function AdminSecurityPage() {
   const { data } = useSettings();
   const { bannedIps, ban, unban } = useBannedIps();
-  const [rateLimitEnabled, setRateLimitEnabled] = useState(MOCK_SETTINGS.rateLimitEnabled);
-  const [rpm, setRpm] = useState(MOCK_SETTINGS.rateLimitRpm);
+  const [rateLimitEnabled, setRateLimitEnabled] = useState(false);
+  const [rpm, setRpm] = useState(100);
   const [newIp, setNewIp] = useState("");
 
   useEffect(() => {
     if (data) {
-      setRateLimitEnabled(data.rateLimitEnabled);
-      setRpm(data.rateLimitRpm);
+      setRateLimitEnabled((data as PanelSettings).rateLimitEnabled ?? false);
+      setRpm((data as PanelSettings).rateLimitRpm ?? 100);
     }
   }, [data]);
 

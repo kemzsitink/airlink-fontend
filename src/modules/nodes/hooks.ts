@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { nodesApi } from "./api";
-import { MOCK_NODES } from "./types";
 import type { CreateNodePayload } from "./types";
 
 export const nodeKeys = {
@@ -12,18 +11,13 @@ export const nodeKeys = {
 };
 
 export function useNodes() {
-  return useQuery({
-    queryKey: nodeKeys.list(),
-    queryFn: nodesApi.list,
-    placeholderData: MOCK_NODES,
-  });
+  return useQuery({ queryKey: nodeKeys.list(), queryFn: nodesApi.list });
 }
 
 export function useNode(id: number) {
   return useQuery({
     queryKey: nodeKeys.detail(id),
     queryFn: () => nodesApi.get(id),
-    placeholderData: MOCK_NODES.find((n) => n.id === id),
     enabled: !!id,
   });
 }

@@ -6,11 +6,14 @@ import { Download, Search } from "lucide-react";
 import { PageTitle } from "@/components/layout/PageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MOCK_STORE_IMAGES } from "@/modules/images/types";
+import type { StoreImage } from "@/modules/images/types";
+
+// Store images will be fetched from backend when endpoint is available
+const storeImages: StoreImage[] = [];
 
 export default function AdminImageStorePage() {
   const [filter, setFilter] = useState("");
-  const filtered = MOCK_STORE_IMAGES.filter((i) =>
+  const filtered = storeImages.filter((i) =>
     `${i.name} ${i.description} ${i.tags.join(" ")}`.toLowerCase().includes(filter.toLowerCase())
   );
 

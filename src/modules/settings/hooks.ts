@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { settingsApi } from "./api";
-import { MOCK_SETTINGS, MOCK_BANNED_IPS } from "./types";
 import type { PanelSettings } from "./types";
 
 export const settingsKeys = {
@@ -11,11 +10,7 @@ export const settingsKeys = {
 };
 
 export function useSettings() {
-  return useQuery({
-    queryKey: settingsKeys.settings,
-    queryFn: settingsApi.get,
-    placeholderData: MOCK_SETTINGS,
-  });
+  return useQuery({ queryKey: settingsKeys.settings, queryFn: settingsApi.get });
 }
 
 export function useSaveRateLimit() {
@@ -41,7 +36,6 @@ export function useBannedIps() {
   const query = useQuery({
     queryKey: settingsKeys.bannedIps,
     queryFn: settingsApi.getBannedIps,
-    placeholderData: MOCK_BANNED_IPS,
   });
 
   const ban = useMutation({
@@ -55,7 +49,7 @@ export function useBannedIps() {
   });
 
   return {
-    bannedIps: query.data ?? MOCK_BANNED_IPS,
+    bannedIps: query.data ?? [],
     ban: (ip: string) => ban.mutate(ip),
     unban: (ip: string) => unban.mutate(ip),
   };

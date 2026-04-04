@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { imagesApi } from "./api";
-import { MOCK_IMAGES } from "./types";
 import type { Image } from "./types";
 
 export const imageKeys = {
@@ -12,18 +11,13 @@ export const imageKeys = {
 };
 
 export function useImages() {
-  return useQuery({
-    queryKey: imageKeys.list(),
-    queryFn: imagesApi.list,
-    placeholderData: MOCK_IMAGES,
-  });
+  return useQuery({ queryKey: imageKeys.list(), queryFn: imagesApi.list });
 }
 
 export function useImage(id: number) {
   return useQuery({
     queryKey: imageKeys.detail(id),
     queryFn: () => imagesApi.get(id),
-    placeholderData: MOCK_IMAGES.find((i) => i.id === id),
     enabled: !!id,
   });
 }

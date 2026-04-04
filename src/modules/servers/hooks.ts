@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { serversApi } from "./api";
-import { MOCK_SERVERS, MOCK_BACKUPS, MOCK_STARTUP, MOCK_FILES } from "./types";
 
 export const serverKeys = {
   all: ["servers"] as const,
@@ -14,18 +13,13 @@ export const serverKeys = {
 };
 
 export function useServers() {
-  return useQuery({
-    queryKey: serverKeys.list(),
-    queryFn: serversApi.list,
-    placeholderData: MOCK_SERVERS,
-  });
+  return useQuery({ queryKey: serverKeys.list(), queryFn: serversApi.list });
 }
 
 export function useServer(uuid: string) {
   return useQuery({
     queryKey: serverKeys.detail(uuid),
     queryFn: () => serversApi.get(uuid),
-    placeholderData: MOCK_SERVERS.find((s) => s.UUID === uuid),
     enabled: !!uuid,
   });
 }
@@ -34,7 +28,6 @@ export function useBackups(uuid: string) {
   return useQuery({
     queryKey: serverKeys.backups(uuid),
     queryFn: () => serversApi.listBackups(uuid),
-    placeholderData: MOCK_BACKUPS,
     enabled: !!uuid,
   });
 }
@@ -43,7 +36,6 @@ export function useStartup(uuid: string) {
   return useQuery({
     queryKey: serverKeys.startup(uuid),
     queryFn: () => serversApi.getStartup(uuid),
-    placeholderData: MOCK_STARTUP,
     enabled: !!uuid,
   });
 }
@@ -52,7 +44,6 @@ export function useFiles(uuid: string, path?: string) {
   return useQuery({
     queryKey: serverKeys.files(uuid, path),
     queryFn: () => serversApi.listFiles(uuid, path),
-    placeholderData: MOCK_FILES,
     enabled: !!uuid,
   });
 }

@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersApi } from "./api";
-import { MOCK_USERS } from "./types";
 import type { CreateUserPayload, UpdateUserPayload } from "./types";
 
 export const userKeys = {
@@ -12,18 +11,13 @@ export const userKeys = {
 };
 
 export function useUsers() {
-  return useQuery({
-    queryKey: userKeys.list(),
-    queryFn: usersApi.list,
-    placeholderData: MOCK_USERS,
-  });
+  return useQuery({ queryKey: userKeys.list(), queryFn: usersApi.list });
 }
 
 export function useUser(id: number) {
   return useQuery({
     queryKey: userKeys.detail(id),
     queryFn: () => usersApi.get(id),
-    placeholderData: MOCK_USERS.find((u) => u.id === id),
     enabled: !!id,
   });
 }

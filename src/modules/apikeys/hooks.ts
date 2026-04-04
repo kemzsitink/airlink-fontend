@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiKeysApi } from "./api";
-import { MOCK_API_KEYS } from "./types";
 import type { CreateApiKeyPayload } from "./types";
 
 export const apiKeyKeys = {
@@ -11,11 +10,7 @@ export const apiKeyKeys = {
 };
 
 export function useApiKeys() {
-  return useQuery({
-    queryKey: apiKeyKeys.list(),
-    queryFn: apiKeysApi.list,
-    placeholderData: MOCK_API_KEYS,
-  });
+  return useQuery({ queryKey: apiKeyKeys.list(), queryFn: apiKeysApi.list });
 }
 
 export function useCreateApiKey() {
